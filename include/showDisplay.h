@@ -58,6 +58,16 @@ namespace shDisp
 		}
 	};
 
+	struct displayLayers
+	{
+		std::vector<cv::Mat> layers;
+		cv::Mat *ptrDisp; 
+
+		displayLayers(u_int N, cv::Mat *pd)
+		{
+			ptrDisp = pd;
+		}
+	};
 }
 
 #endif

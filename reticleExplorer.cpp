@@ -9,6 +9,7 @@
 using namespace std;
 using namespace cv;
 using namespace boost::filesystem;
+using namespace shDisp;
 
 struct pathTStamp
 {
@@ -21,7 +22,7 @@ void processImage(reticleParams &prm, cv::Mat I)
 	
 }
 
-void loadParseFileNames(char *dirName, vector<pathTStamp> &fNm)
+void loadParseFileNames(string dirName, vector<pathTStamp> &fNm)
 {
 	if (is_directory(dirName))
 	{
@@ -47,15 +48,36 @@ int main(int argc, char **argv)
 	vector<pathTStamp> fileNames;
 	vector<pathTStamp>::iterator itp;
 	vector <mFrame> Images;
-	u_int idx;
-
+	string dirName;
+	u_int idx, firstImage = 0, lastImage = 0, numImages;
+	
+	showDisplay D;
+	
 	if (argc < 2)
 		return -1;
 	else
-		loadParseFileNames(argv[1], fileNames);
+	{
+		dirName = argv[1];
 
-	cout << "loading filenames" << endl;
-	for (idx = 0, itp = fileNames.begin(); itp != fileNames.end(); ++itp, ++idx)
+		loadParseFileNames(dirName, fileNames);
+		lastImage = fileNames.size() - 1;
+		
+		if (argc == 3)
+			lastImage = stoi(string(argv[2]));
+		else
+			if (argc > 3)
+			{
+				firstImage = stoi(string(argv[2]));
+				lastImage = stoi(string(argv[3]));
+			}
+	}
+
+	if (lastImage > fileNames.size())
+		lastImage = fileNames.size() - 1;
+
+	numImages = lastImage - firstImage + 1;
+	cout << "loading " << numImages << " Images" << endl;
+	for (idx = firstImage, itp = fileNames.begin() + firstImage; idx <= lastImage && itp != fileNames.end(); ++itp, ++idx)
 	{
 		mFrame mF;
 
@@ -65,6 +87,15 @@ int main(int argc, char **argv)
 	}
 	
     cout << endl;
+
+
+
+	D.testDisplay();
+
+	namedWindow("Display", WINDOW_GUI_EXPANDED);
+	imshow("Display", D.Display);
+
+	waitKeyEx(0);
 
 	return 0;
 }
