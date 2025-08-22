@@ -7,8 +7,6 @@
 #include <vector>
 #include <geom_features.h>
 
-using namespace feat;
-
 namespace shDisp
 {
 	#define H_SEP_SIZE 6
@@ -18,18 +16,16 @@ namespace shDisp
 	#define MAIN_WIDTH 1920
 	#define MAIN_HEIGTH 1080
 
-	enum featureTypes {None=0, image, point, line, circle};
-
 	struct featureDescriptor
 	{
 		u_int id;
-		featureTypes type;
+		gfeat::gFeatureTypes type;
 		cv::Vec3b Color;
 
 		featureDescriptor(uint val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
 		{
 			id = val;
-			type = None;
+			type = gfeat::None;
 			Color[0] = C[0];
 			Color[1] = C[1];
 			Color[2] = C[2];
@@ -42,7 +38,7 @@ namespace shDisp
 
 		imageFeature(uint val):featureDescriptor(val)
 		{
-			type = image;
+			type = gfeat::image;
 		}
 		void set(cv::Mat &I)
 		{
@@ -68,57 +64,59 @@ namespace shDisp
 
 	struct pointFeature: public featureDescriptor
 	{
-		dPoint feature;
+		gfeat::dPoint ftre; // feature
 
 		pointFeature(uint val):featureDescriptor(val)
 		{
-			type = point;
+			type = gfeat::point;
 		}
-		void set(dPoint &val)
+		void set(gfeat::dPoint &val)
 		{
-			feature = val;
+			ftre = val;
 		}
 		void apply(cv::Mat_<cv::Vec3b> &I)
 		{
-			cv::Vec3b *apuI, *endI;
-
+			cv::circle(I, cv::Point(ftre.cx, ftre.cy), ftre.thickness, 1, ftre.lineType);
 		}
 	};
 
 	struct lineFeature: public featureDescriptor
 	{
-		dLine feature;
+		gfeat::dLine ftre;
 
 		lineFeature(uint val):featureDescriptor(val)
 		{
-			type = line;
+			type = gfeat::line;
 		}
-		void set(dLine &val)
+		void set(gfeat::dLine &val)
 		{
-			feature = val;
+			ftre = val;
 		}
 		void apply(cv::Mat_<cv::Vec3b> &I)
 		{
-			cv::Vec3b *apuI, *endI;
-
+			if (!ftre.unbound)	
+				cv::line(I, cv::Point((int)round(ftre.x1),(int)round(ftre.y1)),
+				            cv::Point((int)round(ftre.x2),(int)round(ftre.y2)),
+				            Color, ftre.thickness, ftre.lineType);
+			//else to Be Done Case of unbounded line.
 		}
 	};
 
 	struct circleFeature: public featureDescriptor
 	{
-		dCircle feature;
+		gfeat::dCircle ftre;
 
 		circleFeature(uint val):featureDescriptor(val)
 		{
-			type = circle;
+			type = gfeat::circle;
 		}
-		void set(dCircle &val)
+		void set(gfeat::dCircle &val)
 		{
-			feature = val;
+			ftre = val;
 		}
 		void apply(cv::Mat_<cv::Vec3b> &I)
 		{
-			cv::Vec3b *apuI, *endI;
+			
 		}
 	};
 
@@ -133,25 +131,54 @@ namespace shDisp
 			name = nme;
 			active = false;
 		}
-		void addFeature(featureDescriptor &fD, featureTypes fT, u_int id)
+		void addFeature(featureDescriptor &fD, gfeat::gFeatureTypes fT, u_int id)
 		{
 			switch(fT)
 			{
-				case image:
+				case gfeat::image:
 						L.push_back(std::make_shared<imageFeature>(id));
 					break;
-				case point:
+				case gfeat::point:
 						L.push_back(std::make_shared<pointFeature>(id));
 					break;
-				case line:
+				case gfeat::line:
 						L.push_back(std::make_shared<lineFeature>(id));
 					break;
-				case circle:
+				case gfeat::circle:
 						L.push_back(std::make_shared<circleFeature>(id));
 					break;	
 				default:break;
-			};
-			
+			}
+		}
+		void applyFeatures(cv::Mat_<cv::Vec3b> &I, cv::Mat_<cv::Vec3b> &O)
+		{
+			featureDescriptor *ptr;
+			std::vector<std::shared_ptr<featureDescriptor>>::iterator it, end;
+
+			O = I.clone();
+			it = L.begin();
+			end = L.end();
+			for (; it != end; ++it)
+			{
+				ptr = it->get();
+
+				switch(ptr->type)
+				{
+					case gfeat::image:
+							((imageFeature *)ptr)->apply(O);
+						break;
+					case gfeat::point:
+							((pointFeature *)ptr)->apply(O);
+						break;
+					case gfeat::line:
+							((lineFeature *)ptr)->apply(O);
+						break;
+					case gfeat::circle:
+							((circleFeature *)ptr)->apply(O);
+						break;	
+					default:break;
+				}
+			}
 		}
 	};
 	

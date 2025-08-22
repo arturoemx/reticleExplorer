@@ -1,8 +1,10 @@
 #ifndef __GEOM_FEATURES__
 #define __GEOM_FEATURES__
 
-namespace feat
+namespace gfeat
 {
+	enum gFeatureTypes {None=0, image, point, line, circle};
+
 	struct vec2D
 	{
 		float p[3];
@@ -49,20 +51,33 @@ namespace feat
 	*/
 	struct point2D: public vec2D
 	{
+		float cx, cy;
 		point2D():vec2D()
 		{
+			cx = cy = 0.;
 		}
 		point2D(int _x, int _y, int _w = 1):vec2D(_x, _y, _w)
 		{
+			float iw = 1./p[2];
 
+			cx = p[0] * iw;
+			cy = p[1] * iw;
 		}
 		point2D(float _x, float _y, float _w = 1):vec2D(_x, _y, _w)
 		{
+			float iw = 1./p[2];
 
+			cx = p[0] * iw;
+			cy = p[1] * iw;
 		}
 		void intersect(vec2D &l1, vec2D &l2)
 		{
+			float iw;
+
 			l1.cross(l1, l2);
+			iw = 1./p[2];
+			cx = p[0] * iw;
+			cy = p[1] * iw;
 		}
 	};
 
@@ -73,18 +88,23 @@ namespace feat
 	struct line2D: public vec2D
 	{
 		float x1, y1, x2, y2; //endpoints
+		bool unbound;
 
 		line2D():vec2D()
 		{
+			x1 = y1 = x2 = y2 = 0.;
+			unbound = true;
 		}
 		line2D(int _A, int _B, int _C = 1):vec2D(_A, _B, _C)
 		{
 			x1 = y1 = x2 = y2 = 0.;
+			unbound = true;
 		}
 		
 		line2D(float _A, float _B, float _C = 1):vec2D(_A, _B, _C)
 		{
 			x1 = y1 = x2 = y2 = 0.;
+			unbound = true;
 		}
 		
 		line2D(float a, float b, float d, float e)
@@ -93,6 +113,7 @@ namespace feat
 			y1 = b;
 			x2 = d;
 			y2 = e;
+			unbound = false;
 
 			p[0] = b - e;
 			p[1] = d - a;
@@ -110,6 +131,7 @@ namespace feat
 		{
 			cross(p1, p2);
 			x1 = y1 = x2 = y2 = 0.;
+			unbound = true;
 		}
 	};
 
@@ -135,7 +157,26 @@ namespace feat
 		}
 	};
 
-	struct dPoint: public point2D
+	struct drawingFeatures
+	{
+		int thickness;
+		int lineType;
+		drawingFeatures()
+		{
+			thickness = 3;
+			lineType = cv::LINE_AA;
+		}
+		void setThickness(int t)
+		{
+			thickness = t;
+		}
+		void setLineType(int type)
+		{
+			lineType = type;
+		}
+	};
+
+	struct dPoint: public point2D, public drawingFeatures
 	{
 		dPoint():point2D()
 		{
@@ -150,7 +191,7 @@ namespace feat
 		}
 
 	};
-	struct dLine: public line2D
+	struct dLine: public line2D, public drawingFeatures
 	{
 		dLine():line2D()
 		{
@@ -162,7 +203,7 @@ namespace feat
 		{
 		}
 	};
-	struct dCircle: public circle 
+	struct dCircle: public circle, public drawingFeatures 
 	{
 		dCircle():circle()
 		{
