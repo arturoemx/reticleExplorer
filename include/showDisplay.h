@@ -1,6 +1,7 @@
 #ifndef __SHOW_DISPLAY__
 #define __SHOW_DISPLAY__
 
+#include <math.h>
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <memory>
@@ -30,6 +31,17 @@ namespace shDisp
 			Color[1] = C[1];
 			Color[2] = C[2];
 		}
+		void setId(u_int _id)
+		{
+			id = _id;
+		}
+		void setColor(cv::Scalar_<uchar> C)
+		{
+			Color[0] = C[0];
+			Color[1] = C[1];
+			Color[2] = C[2];
+		}
+
 	};
 
 	struct imageFeature: public featureDescriptor
@@ -76,7 +88,7 @@ namespace shDisp
 		}
 		void apply(cv::Mat_<cv::Vec3b> &I)
 		{
-			cv::circle(I, cv::Point(ftre.cx, ftre.cy), ftre.thickness, 1, ftre.lineType);
+			I.at<cv::Vec3b>((int)rintf(ftre.cx), (int)rintf(ftre.cy)) = Color;
 		}
 	};
 
@@ -95,8 +107,8 @@ namespace shDisp
 		void apply(cv::Mat_<cv::Vec3b> &I)
 		{
 			if (!ftre.unbound)	
-				cv::line(I, cv::Point((int)round(ftre.x1),(int)round(ftre.y1)),
-				            cv::Point((int)round(ftre.x2),(int)round(ftre.y2)),
+				cv::line(I, cv::Point((int)rintf(ftre.x1),(int)rintf(ftre.y1)),
+				            cv::Point((int)rintf(ftre.x2),(int)rintf(ftre.y2)),
 				            Color, ftre.thickness, ftre.lineType);
 			//else to Be Done Case of unbounded line.
 		}
@@ -116,7 +128,43 @@ namespace shDisp
 		}
 		void apply(cv::Mat_<cv::Vec3b> &I)
 		{
-			
+			cv::circle(I, cv::Point((int)rint(ftre.h), (int)rint(ftre.k)), (int)rint(ftre.r), ftre.thickness, ftre.lineType);
+		}
+	};
+
+	struct markerFeature: public featureDescriptor
+	{
+		gfeat::dPoint ftre; // feature
+		cv::MarkerTypes mType;
+		int mSize;
+		
+	
+		markerFeature(uint val, cv::MarkerTypes mt = cv::MARKER_CROSS):featureDescriptor(val)
+		{
+			mType = mt;
+			mSize = 20;
+			type = gfeat::point;
+		}
+		void setIdType(u_int _id, cv::MarkerTypes mt = cv::MARKER_CROSS)
+		{
+			id = _id;
+			mType = mt;
+		}
+		void set(gfeat::dPoint &val)
+		{
+			ftre = val;
+		}
+		void setMarkerType(cv::MarkerTypes mt)
+		{
+			mType = mt;
+		}
+		void setMarkerSize(int ms)
+		{
+			mSize = ms;
+		}
+		void apply(cv::Mat_<cv::Vec3b> &I)
+		{
+			cv::drawMarker(I, cv::Point((int)rint(ftre.cx), (int)rint(ftre.cy)), Color, mSize, ftre.thickness, ftre.lineType);
 		}
 	};
 
@@ -126,30 +174,53 @@ namespace shDisp
 		bool active;
 		std::vector<std::shared_ptr<featureDescriptor>> L;
 
-		paintLayer(std::string &nme)
+		paintLayer(std::string nme)
 		{	
 			name = nme;
 			active = false;
 		}
-		void addFeature(featureDescriptor &fD, gfeat::gFeatureTypes fT, u_int id)
+
+		void addImageFeature(u_int id, cv::Mat &I)
 		{
-			switch(fT)
-			{
-				case gfeat::image:
-						L.push_back(std::make_shared<imageFeature>(id));
-					break;
-				case gfeat::point:
-						L.push_back(std::make_shared<pointFeature>(id));
-					break;
-				case gfeat::line:
-						L.push_back(std::make_shared<lineFeature>(id));
-					break;
-				case gfeat::circle:
-						L.push_back(std::make_shared<circleFeature>(id));
-					break;	
-				default:break;
-			}
+			std::shared_ptr<imageFeature> ptr;
+			ptr->setId(id);
+			ptr->set(I);
+			L.push_back(ptr);
 		}
+
+
+		void addPointFeature(u_int id, gfeat::dPoint &val)
+		{
+			std::shared_ptr<pointFeature> ptr;
+			ptr->setId(id);
+			ptr->set(val);
+			L.push_back(ptr);
+		}
+
+		void addLineFeature(u_int id, gfeat::dLine &val)
+		{
+			std::shared_ptr<lineFeature> ptr;
+			ptr->setId(id);
+			ptr->set(val);
+			L.push_back(ptr);
+		}
+		
+		void addCircleFeature(u_int id, gfeat::dCircle &val)
+		{
+			std::shared_ptr<circleFeature> ptr;
+			ptr->setId(id);
+			ptr->set(val);
+			L.push_back(ptr);
+		}
+
+		void addMarkerFeature(u_int id, gfeat::dPoint &val, cv::MarkerTypes mt = cv::MARKER_CROSS)
+		{
+			std::shared_ptr<markerFeature> ptr;
+			ptr->setIdType(id, mt);
+			ptr->set(val);
+			L.push_back(ptr);
+		}
+
 		void applyFeatures(cv::Mat_<cv::Vec3b> &I, cv::Mat_<cv::Vec3b> &O)
 		{
 			featureDescriptor *ptr;
@@ -176,6 +247,8 @@ namespace shDisp
 					case gfeat::circle:
 							((circleFeature *)ptr)->apply(O);
 						break;	
+					case gfeat::marker:
+							((markerFeature *)ptr)->apply(O);
 					default:break;
 				}
 			}

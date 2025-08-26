@@ -3,7 +3,7 @@
 
 namespace gfeat
 {
-	enum gFeatureTypes {None=0, image, point, line, circle};
+	enum gFeatureTypes {None=0, image, point, line, circle, marker};
 
 	struct vec2D
 	{
