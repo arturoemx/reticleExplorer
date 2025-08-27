@@ -43,7 +43,7 @@ int main()
 			x = random() % D.mainWidth;
 			y = random() % D.mainHeight;
 
-			gfeat::dPoint p(x, y);
+			dPoint p(x, y);
 			pointLayer.addPointFeature(p, idx++, Scalar_<uchar> (255,128,255));
 		}
 
@@ -56,7 +56,7 @@ int main()
 			x2 = random() % D.mainWidth;
 			y2 = random() % D.mainHeight;
 		
-			gfeat::dLine l(x1, y1, x2, y2);
+			dLine l(x1, y1, x2, y2);
 			lineLayer.addLineFeature(l, idx++, cv::Scalar_<uchar> (96,0,128));
 		}
 
@@ -68,7 +68,7 @@ int main()
 			y = random() % D.mainHeight;
 			r = random() % 100;
 		
-			gfeat::dCircle c(x, y, r);
+			dCircle c(x, y, r);
 			circleLayer.addCircleFeature(c, idx++, cv::Scalar_<uchar> (0,150,200));
 		}
 
@@ -79,7 +79,7 @@ int main()
 			x = random() % D.mainWidth;
 			y = random() % D.mainHeight;
 
-			gfeat::dPoint p(x, y);
+			dPoint p(x, y);
 			markerLayer.addMarkerFeature(p, idx++, cv::Scalar_<uchar> (146,114,0), cv::MARKER_TRIANGLE_UP);
 		}
 

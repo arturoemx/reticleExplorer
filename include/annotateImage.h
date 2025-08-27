@@ -13,13 +13,13 @@ namespace imNote
 	struct featureDescriptor
 	{
 		u_int id;
-		gfeat::gFeatureTypes type;
+		dFeatureTypes type;
 		cv::Vec3b Color;
 
 		featureDescriptor(uint val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
 		{
 			id = val;
-			type = gfeat::None;
+			type = None;
 			Color[0] = C[0];
 			Color[1] = C[1];
 			Color[2] = C[2];
@@ -43,7 +43,7 @@ namespace imNote
 
 		imageFeature(uint val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255)):featureDescriptor(val, C)
 		{
-			type = gfeat::image;
+			type = image;
 		}
 		void set(cv::Mat &I)
 		{
@@ -69,13 +69,13 @@ namespace imNote
 
 	struct pointFeature: public featureDescriptor
 	{
-		gfeat::dPoint ftre; // feature
+		dPoint ftre; // feature
 
 		pointFeature(uint val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255)):featureDescriptor(val, C)
 		{
-			type = gfeat::point;
+			type = point;
 		}
-		void set(gfeat::dPoint &val)
+		void set(dPoint &val)
 		{
 			ftre = val;
 		}
@@ -87,13 +87,13 @@ namespace imNote
 
 	struct lineFeature: public featureDescriptor
 	{
-		gfeat::dLine ftre;
+		dLine ftre;
 
 		lineFeature(uint val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255)):featureDescriptor(val, C)
 		{
-			type = gfeat::line;
+			type = line;
 		}
-		void set(gfeat::dLine &val)
+		void set(dLine &val)
 		{
 			ftre = val;
 		}
@@ -109,13 +109,13 @@ namespace imNote
 
 	struct circleFeature: public featureDescriptor
 	{
-		gfeat::dCircle ftre;
+		dCircle ftre;
 
 		circleFeature(uint val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255)):featureDescriptor(val, C)
 		{
-			type = gfeat::circle;
+			type = circle;
 		}
-		void set(gfeat::dCircle &val)
+		void set(dCircle &val)
 		{
 			ftre = val;
 		}
@@ -127,7 +127,7 @@ namespace imNote
 
 	struct markerFeature: public featureDescriptor
 	{
-		gfeat::dPoint ftre; // feature
+		dPoint ftre; // feature
 		cv::MarkerTypes mType;
 		int mSize;
 		
@@ -136,14 +136,14 @@ namespace imNote
 		{
 			mType = mt;
 			mSize = 20;
-			type = gfeat::marker;
+			type = marker;
 		}
 		void setIdType(u_int _id, cv::MarkerTypes mt = cv::MARKER_CROSS)
 		{
 			id = _id;
 			mType = mt;
 		}
-		void set(gfeat::dPoint &val)
+		void set(dPoint &val)
 		{
 			ftre = val;
 		}
@@ -181,28 +181,28 @@ namespace imNote
 		}
 
 
-		void addPointFeature( gfeat::dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
+		void addPointFeature(dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
 		{
 			std::shared_ptr<pointFeature> ptr(new pointFeature(id, C));
 			ptr->set(val);
 			L.push_back(ptr);
 		}
 
-		void addLineFeature(gfeat::dLine &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
+		void addLineFeature(dLine &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
 		{
 			std::shared_ptr<lineFeature> ptr(new lineFeature(id, C));
 			ptr->set(val);
 			L.push_back(ptr);
 		}
 		
-		void addCircleFeature(gfeat::dCircle &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
+		void addCircleFeature(dCircle &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
 		{
 			std::shared_ptr<circleFeature> ptr(new circleFeature(id, C));
 			ptr->set(val);
 			L.push_back(ptr);
 		}
 
-		void addMarkerFeature(gfeat::dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255), cv::MarkerTypes mt = cv::MARKER_CROSS)
+		void addMarkerFeature(dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255), cv::MarkerTypes mt = cv::MARKER_CROSS)
 		{
 			std::shared_ptr<markerFeature> ptr(new markerFeature(id, C, mt));
 			ptr->set(val);
@@ -222,19 +222,19 @@ namespace imNote
 
 				switch(ptr->type)
 				{
-					case gfeat::image:
+					case image:
 							((imageFeature *)ptr)->apply(I);
 						break;
-					case gfeat::point:
+					case point:
 							((pointFeature *)ptr)->apply(I);
 						break;
-					case gfeat::line:
+					case line:
 							((lineFeature *)ptr)->apply(I);
 						break;
-					case gfeat::circle:
+					case circle:
 							((circleFeature *)ptr)->apply(I);
 						break;	
-					case gfeat::marker:
+					case marker:
 							((markerFeature *)ptr)->apply(I);
 					default:break;
 				}

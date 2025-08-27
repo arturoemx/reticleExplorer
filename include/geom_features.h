@@ -3,8 +3,6 @@
 
 namespace gfeat
 {
-	enum gFeatureTypes {None=0, image, point, line, circle, marker};
-
 	struct vec2D
 	{
 		float p[3];
@@ -134,62 +132,6 @@ namespace gfeat
 			h = (float)_h;
 			k = (float)_k;
 			r = (float)_r;
-		}
-	};
-
-	struct drawingFeatures
-	{
-		int thickness;
-		int lineType;
-		drawingFeatures()
-		{
-			thickness = 1;
-			lineType = cv::LINE_8;
-		}
-		void setThickness(int t)
-		{
-			thickness = t;
-		}
-		void setLineType(int type)
-		{
-			lineType = type;
-		}
-	};
-
-	struct dPoint: public point2D, public drawingFeatures
-	{
-		dPoint():point2D()
-		{
-		}
-		template <typename X>
-		dPoint(X _x, X _y, X _w = 1):point2D(_x, _y, _w)
-		{
-
-		}
-	};
-	struct dLine: public line2D, public drawingFeatures
-	{
-		dLine():line2D()
-		{
-		}
-		template <typename X>
-		dLine(X _A, X _B, X _C):line2D(_A, _B, _C)
-		{
-		}
-		template <typename X>
-		dLine(X x1, X y1, X x2, X y2):line2D(x1, y1, x2, y2)
-		{
-		}
-	};
-	struct dCircle: public circle, public drawingFeatures 
-	{
-		dCircle():circle()
-		{
-		}
-		template <typename X>
-		dCircle(X _h, X _k, X _r):circle(_h, _k, _r)
-		{
-
 		}
 	};
 }

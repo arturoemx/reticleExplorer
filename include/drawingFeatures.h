@@ -4,6 +4,8 @@
 #include <geom_features.h>
 #include <opencv2/opencv.hpp>
 
+enum dFeatureTypes {None=0, image, point, line, circle, marker};
+
 struct drawingFeatures
 {
 	int thickness;
