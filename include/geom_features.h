@@ -14,17 +14,12 @@ namespace gfeat
 			p[0] = p[1] = 0.;
 			p[2] =1.;
 		}
-		vec2D (int _x, int _y, int _w = 1)
+		template<typename X>
+		vec2D (X _x, X _y, X _w = 1)
 		{
-			p[0] = _x;
-			p[1] = _y;
-			p[2] = _w; 
-		}
-		vec2D (float _x, float _y, float _w = 1)
-		{
-			p[0] = _x;
-			p[1] = _y;
-			p[2] = _w;
+			p[0] = (float)_x;
+			p[1] = (float)_y;
+			p[2] = (float)_w; 
 		}
 		void cross(vec2D &s, vec2D &t)
 		{
@@ -56,14 +51,8 @@ namespace gfeat
 		{
 			cx = cy = 0.;
 		}
-		point2D(int _x, int _y, int _w = 1):vec2D(_x, _y, _w)
-		{
-			float iw = 1./p[2];
-
-			cx = p[0] * iw;
-			cy = p[1] * iw;
-		}
-		point2D(float _x, float _y, float _w = 1):vec2D(_x, _y, _w)
+		template<typename X>
+		point2D(X _x, X _y, X _w = 1):vec2D(_x, _y, _w)
 		{
 			float iw = 1./p[2];
 
@@ -95,24 +84,20 @@ namespace gfeat
 			x1 = y1 = x2 = y2 = 0.;
 			unbound = true;
 		}
-		line2D(int _A, int _B, int _C = 1):vec2D(_A, _B, _C)
+		template<typename X>
+		line2D(X _A, X _B, X _C = 1):vec2D(_A, _B, _C)
 		{
 			x1 = y1 = x2 = y2 = 0.;
 			unbound = true;
 		}
 		
-		line2D(float _A, float _B, float _C = 1):vec2D(_A, _B, _C)
+		template<typename X>
+		line2D(X a, X b, X d, X e)
 		{
-			x1 = y1 = x2 = y2 = 0.;
-			unbound = true;
-		}
-		
-		line2D(float a, float b, float d, float e)
-		{
-			x1 = a;
-			y1 = b;
-			x2 = d;
-			y2 = e;
+			x1 = (float)a;
+			y1 = (float)b;
+			x2 = (float)d;
+			y2 = (float)e;
 			unbound = false;
 
 			p[0] = b - e;
@@ -143,17 +128,12 @@ namespace gfeat
 		{
 			h=k=r=0.;
 		}
-		circle (float _h, float _k, float _r)
+		template <typename X>
+		circle (X _h, X _k, X _r)
 		{
-			h = _h;
-			k = _k;
-			r = _r;
-		}
-		circle (int _h, int _k, int _r)
-		{
-			h = _h;
-			k = _k;
-			r = _r;
+			h = (float)_h;
+			k = (float)_k;
+			r = (float)_r;
 		}
 	};
 
@@ -163,8 +143,8 @@ namespace gfeat
 		int lineType;
 		drawingFeatures()
 		{
-			thickness = 3;
-			lineType = cv::LINE_AA;
+			thickness = 1;
+			lineType = cv::LINE_8;
 		}
 		void setThickness(int t)
 		{
@@ -181,25 +161,23 @@ namespace gfeat
 		dPoint():point2D()
 		{
 		}
-		dPoint(int _x, int _y, int _w = 1):point2D(_x, _y, _w)
+		template <typename X>
+		dPoint(X _x, X _y, X _w = 1):point2D(_x, _y, _w)
 		{
 
 		}
-		dPoint(float _x, float _y, float _w = 1.):point2D(_x, _y, _w)
-		{
-
-		}
-
 	};
 	struct dLine: public line2D, public drawingFeatures
 	{
 		dLine():line2D()
 		{
 		}
-		dLine(float _A, float _B, float _C):line2D(_A, _B, _C)
+		template <typename X>
+		dLine(X _A, X _B, X _C):line2D(_A, _B, _C)
 		{
 		}
-		dLine(int _A, int _B, int _C):line2D(_A, _B, _C)
+		template <typename X>
+		dLine(X x1, X y1, X x2, X y2):line2D(x1, y1, x2, y2)
 		{
 		}
 	};
@@ -208,7 +186,8 @@ namespace gfeat
 		dCircle():circle()
 		{
 		}
-		dCircle(float _h, float _k, float _r):circle(_h, _k, _r)
+		template <typename X>
+		dCircle(X _h, X _k, X _r):circle(_h, _k, _r)
 		{
 
 		}
