@@ -11,11 +11,11 @@ using namespace imNote;
 int main()
 {
 	showDisplay D;
-	paintLayer imageLayer("imagen");
-	paintLayer pointLayer("Puntos");
-	paintLayer lineLayer("Lineas");
-	paintLayer circleLayer("Circulos");
-	paintLayer markerLayer("Marcadores");
+	featureLayer imageLayer("imagen");
+	featureLayer pointLayer("Puntos");
+	featureLayer lineLayer("Lineas");
+	featureLayer circleLayer("Circulos");
+	featureLayer markerLayer("Marcadores");
 
 	uint idx = 0, i;
 	int keyVal;
@@ -91,7 +91,7 @@ int main()
 		
 				
 		cout << "Iteración #" << itNo << endl;
-		cout << "paintLayerSize: " << pointLayer.L.size() << endl << endl;
+		cout << "featureLayerSize: " << pointLayer.L.size() << endl << endl;
 		cout.flush();
 		
 		itNo++;

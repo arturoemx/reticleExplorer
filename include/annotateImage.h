@@ -161,13 +161,13 @@ namespace imNote
 		}
 	};
 
-	struct paintLayer
+	struct featureLayer
 	{
 		std::string name;
 		bool active;
 		std::vector<std::shared_ptr<featureDescriptor>> L;
 
-		paintLayer(std::string nme)
+		featureLayer(std::string nme)
 		{	
 			name = nme;
 			active = false;
@@ -240,6 +240,14 @@ namespace imNote
 				}
 			}
 		}
+	};
+
+/*
+	struct annotation
+	{
+		int nLayers;
+		vector<Mat_<cv::Vec3b>> annoteLayer;
+		vector<featureLayer> Features;
 	};
 }
 #endif

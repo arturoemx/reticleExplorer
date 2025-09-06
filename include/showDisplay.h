@@ -23,8 +23,6 @@ namespace shDisp
 		uint consoleWidth, consoleHeight;
 		uint dataWidth, dataHeight;
 
-		std::vector <imNote::paintLayer> pLayers;
-
 		cv::Mat Display;
 		cv::Mat Main;
 		cv::Mat Console;
