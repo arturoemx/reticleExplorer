@@ -1,7 +1,7 @@
 #ifndef __DRAWING_FEATURES__
 #define __DRAWING_FEATURES__
 
-#include <geom_features.h>
+#include <geomFeatures.h>
 #include <opencv2/opencv.hpp>
 
 enum dFeatureTypes {None=0, image, point, line, circle, marker};

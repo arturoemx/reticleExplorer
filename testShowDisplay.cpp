@@ -10,23 +10,28 @@ using namespace imNote;
 
 int main()
 {
-	showDisplay D;
-	featureLayer imageLayer("imagen");
-	featureLayer pointLayer("Puntos");
-	featureLayer lineLayer("Lineas");
-	featureLayer circleLayer("Circulos");
-	featureLayer markerLayer("Marcadores");
-
 	uint idx = 0, i;
 	int keyVal;
 	uint itNo = 0;
 	cv::Mat_<cv::Vec3b> Base;
+	showDisplay D;
+
+	Base = imread("images/JaguarUmbralizado.png", IMREAD_GRAYSCALE);
+
+	
+	featureLayer imageLayer("imagen", Base.rows, Base.cols);
+	featureLayer pointLayer("Puntos", Base.rows, Base.cols);
+	featureLayer lineLayer("Lineas", Base.rows, Base.cols);
+	featureLayer circleLayer("Circulos", Base.rows, Base.cols);
+	featureLayer markerLayer("Marcadores", Base.rows, Base.cols);
+
+	
 
 	D.testDisplay();
 	namedWindow("Display", WINDOW_GUI_EXPANDED);
 	imshow("Display", D.Display);
 	waitKeyEx(0);
-	Base = imread("images/JaguarUmbralizado.png", IMREAD_GRAYSCALE);
+	
 
 	imageLayer.addImageFeature(Base, idx++, Scalar_<uchar> (0, 128, 0));
 	while (true)

@@ -3,7 +3,7 @@
 INDR = ./include
 CXXFLAGS = -Wall -g -I $(INDR)
 
-INCLUDES = $(INDR)/reticleExplorer.h $(INDR)/showDisplay.h $(INDR)/geom_features.h $(INDR)/drawingFeatures.h $(INDR)/annotateImage.h  
+INCLUDES = $(INDR)/reticleExplorer.h $(INDR)/showDisplay.h $(INDR)/geomFeatures.h $(INDR)/drawingFeatures.h $(INDR)/annotateImage.h  
 
 
 all: testShowDisplay reticleExplorer

@@ -166,15 +166,23 @@ namespace imNote
 		std::string name;
 		bool active;
 		std::vector<std::shared_ptr<featureDescriptor>> L;
+		cv::Mat lyImage;
 
-		featureLayer(std::string nme)
+		featureLayer(std::string nme, int _r, int _c)
 		{	
 			name = nme;
 			active = false;
+			lyImage = cv::Mat::zeros(_r, _c, CV_8UC3);
 		}
 
 		void addImageFeature(cv::Mat &I, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
 		{
+			if (I.rows != lyImage.rows || I.cols != lyImage.cols || I.channels() != 1)
+			{
+				std::cerr << "Error in addImageFeature" << std::endl;
+				std::cerr.flush();
+				return;
+			}
 			std::shared_ptr<imageFeature> ptr(new imageFeature(id, C));
 			ptr->set(I);
 			L.push_back(ptr);
@@ -242,12 +250,33 @@ namespace imNote
 		}
 	};
 
-/*
+
 	struct annotation
 	{
 		int nLayers;
-		vector<Mat_<cv::Vec3b>> annoteLayer;
-		vector<featureLayer> Features;
+		int rows, cols;
+		std::vector<featureLayer> Features;
+		cv::Mat_<cv::Vec3b> topLayer;
+
+		annotation(int r, int c)
+		{
+			if (r <=0 || c <= 0)
+			{
+				std::cerr << "Error in annotation constructor." << std::endl;
+				std::cerr.flush();
+				return;
+			}
+			rows = r;
+			cols = c;
+			topLayer = cv::Mat::zeros(rows, cols, CV_8UC3);
+			nLayers = 0;
+		}
+		void addLayer(std::string nme)
+		{
+			featureLayer ly(nme, rows, cols);
+
+			Features.push_back(ly);
+		}
 	};
 }
 #endif
