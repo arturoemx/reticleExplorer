@@ -13,11 +13,10 @@ int main()
 	uint idx = 0, i;
 	int keyVal;
 	uint itNo = 0;
-	cv::Mat_<cv::Vec3b> Base;
+	cv::Mat Base;
 	showDisplay D;
 
 	Base = imread("images/JaguarUmbralizado.png", IMREAD_GRAYSCALE);
-
 	
 	featureLayer imageLayer("imagen", Base.rows, Base.cols);
 	featureLayer pointLayer("Puntos", Base.rows, Base.cols);
@@ -25,15 +24,16 @@ int main()
 	featureLayer circleLayer("Circulos", Base.rows, Base.cols);
 	featureLayer markerLayer("Marcadores", Base.rows, Base.cols);
 
+	imageLayer.addImageFeature(Base, idx++, Scalar_<uchar> (0, 128, 0));
 	
 
 	D.testDisplay();
+	imageLayer.applyFeatures(D.Main);
 	namedWindow("Display", WINDOW_GUI_EXPANDED);
 	imshow("Display", D.Display);
 	waitKeyEx(0);
 	
 
-	imageLayer.addImageFeature(Base, idx++, Scalar_<uchar> (0, 128, 0));
 	while (true)
 	{
 		imshow("Display", D.Display);

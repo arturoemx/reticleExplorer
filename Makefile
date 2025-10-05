@@ -1,7 +1,7 @@
 
 
 INDR = ./include
-CXXFLAGS = -Wall -g -I $(INDR)
+CXXFLAGS = -Wall -g -I $(INDR) -DQT
 
 INCLUDES = $(INDR)/reticleExplorer.h $(INDR)/showDisplay.h $(INDR)/geomFeatures.h $(INDR)/drawingFeatures.h $(INDR)/annotateImage.h  
 

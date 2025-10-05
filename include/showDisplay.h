@@ -51,10 +51,24 @@ namespace shDisp
 
 		void testDisplay()
 		{
-			Display = cv::Scalar_<uchar>( 255, 255, 255 );
+			Display = cv::Scalar_<uchar>(   0,   0,   0 );
 			Main    = cv::Scalar_<uchar>(   0,   0,   0 );
-			Console = cv::Scalar_<uchar>(   0,   0,   0 );
-			Data    = cv::Scalar_<uchar>( 255,   0, 255 );
+			Console = cv::Scalar_<uchar>(  64, 128,   0 );
+			Data    = cv::Scalar_<uchar>( 128,  64,   0 );
+		}
+
+		void setMain(cv::Mat &I)
+		{
+			if (I.rows != Main.rows || I.cols != Main.cols)
+			{
+				std::cerr << "Error in setMain: mismatch size"
+			              << std::endl;
+			    return;
+			}
+			//for (int i=0;i<I.rows;++i)
+			//	for (int j=0;j<I.cols;++j)
+			//		Main.at<cv::Vec3b>(i,j) = I.at<cv::Vec3b>(i,j);
+			I.copyTo(Main);//.clone();
 		}
 	};
 }
