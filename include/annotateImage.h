@@ -283,6 +283,55 @@ namespace imNote
 
 			Features.push_back(ly);
 		}
+
+		void moveLayerUp(std::string name)
+		{
+			unsigned int idx;
+
+			idx = idxMap[name];
+
+			if (idx == 0)
+				return;
+
+			std::vector<featureLayer>::iterator it, prev;
+
+			prev = Features.begin() + idx - 1;
+			it = prev + 1;
+			std::iter_swap(prev,it);
+		}
+
+		void moveLayerDown(std::string name)
+		{
+			unsigned int idx;
+
+			idx = idxMap[name];
+
+			if (idx == Features.size() - 1)
+				return;
+
+			std::vector<featureLayer>::iterator it, next;
+
+			it = Features.begin() + idx;
+			next = it + 1;
+			std::iter_swap(it, next);
+		}
+
+		void activateLayer(std::string name)
+		{
+			unsigned int idx;
+
+			idx = idxMap[name];
+			Features[idx].active = true;
+		}
+
+		void deactivateLayer(std::string name)
+		{
+			unsigned int idx;
+
+			idx = idxMap[name];
+			Features[idx].active = false;
+		}
+
 		void applyAnnotations(cv::Mat &I)
 		{
 			unsigned int i, N;
@@ -300,6 +349,7 @@ namespace imNote
 				if (Features[i].active == true)
 					Features[i].applyFeatures(I);
 		}
+
 		void addImageFeature(std::string name, cv::Mat &I, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
 		{
 			unsigned int idx;
@@ -308,6 +358,7 @@ namespace imNote
 			Features[idx].addImageFeature(I, id, C);
 
 		}
+
 		void addPointFeature(std::string name, dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
 		{
 			unsigned int idx;
