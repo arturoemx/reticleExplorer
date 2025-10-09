@@ -32,32 +32,13 @@ struct mFrame
 		double timeStamp;
 		std::string path;
 		
-		mFrame ()
-		{
-			timeStamp = 0.;
-		}
+		mFrame ();
 
-		mFrame(const std::string &pth, double tmsp)
-		{
-			path = std::string(pth);
-			Frame = cv::imread(path);
-			timeStamp = tmsp;
-		}
+		mFrame(const std::string &pth, double tmsp);
 
-		mFrame (const mFrame &mF)
-		{
-			Frame = mF.Frame.clone();
-			timeStamp = mF.timeStamp;
-			path = mF.path;
-		}
+		mFrame (const mFrame &mF);
 
-		mFrame & operator = (const mFrame &mF)
-		{
-			Frame = mF.Frame.clone();
-			timeStamp = mF.timeStamp;
-			path = mF.path;
-			return *this;
-		}
+		mFrame & operator = (const mFrame &mF);
 };
 
 #endif

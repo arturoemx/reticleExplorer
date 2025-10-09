@@ -30,46 +30,11 @@ namespace shDisp
 
 		showDisplay(uint _w=WIDTH, uint _h=HEIGHT,\
 		            uint _mW=MAIN_WIDTH, uint _mH=MAIN_HEIGTH,\
-		            uint _hS=H_SEP_SIZE, uint _vS=V_SEP_SIZE)
-		{
-			width = _w;
-			height = _h;
-			mainWidth = _mW;
-			mainHeight = _mH;
-			hSep = _hS;
-			vSep = _vS;
-			consoleWidth = width - 2 * hSep;
-			consoleHeight = height - mainHeight - 3 * vSep;
-			dataWidth = width - mainWidth - 3 * hSep;
-			dataHeight = mainHeight;
-
-			Display = cv::Mat::zeros(height, width, CV_8UC3);
-			Main = Display(cv::Rect(hSep, vSep, mainWidth, mainHeight));
-			Console = Display(cv::Rect(hSep,vSep*2+mainHeight, consoleWidth, consoleHeight));
-			Data = Display(cv::Rect(2*hSep+mainWidth,vSep, dataWidth, dataHeight));
-		}
-
-		void testDisplay()
-		{
-			Display = cv::Scalar_<uchar>(   0,   0,   0 );
-			Main    = cv::Scalar_<uchar>(   0,   0,   0 );
-			Console = cv::Scalar_<uchar>(  64, 128,   0 );
-			Data    = cv::Scalar_<uchar>( 128,  64,   0 );
-		}
-
-		void setMain(cv::Mat &I)
-		{
-			if (I.rows != Main.rows || I.cols != Main.cols)
-			{
-				std::cerr << "Error in setMain: mismatch size"
-			              << std::endl;
-			    return;
-			}
-			//for (int i=0;i<I.rows;++i)
-			//	for (int j=0;j<I.cols;++j)
-			//		Main.at<cv::Vec3b>(i,j) = I.at<cv::Vec3b>(i,j);
-			I.copyTo(Main);//.clone();
-		}
+		            uint _hS=H_SEP_SIZE, uint _vS=V_SEP_SIZE);
+		
+		void testDisplay();
+		
+		void setMain(cv::Mat &I);
 	};
 }
 
