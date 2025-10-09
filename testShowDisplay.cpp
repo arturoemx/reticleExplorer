@@ -18,17 +18,19 @@ int main()
 
 	Base = imread("images/JaguarUmbralizado.png", IMREAD_GRAYSCALE);
 	
-	featureLayer imageLayer("imagen", Base.rows, Base.cols);
-	featureLayer pointLayer("Puntos", Base.rows, Base.cols);
-	featureLayer lineLayer("Lineas", Base.rows, Base.cols);
-	featureLayer circleLayer("Circulos", Base.rows, Base.cols);
-	featureLayer markerLayer("Marcadores", Base.rows, Base.cols);
+	annotation Notes(Base.rows, Base.cols);
 
-	imageLayer.addImageFeature(Base, idx++, Scalar_<uchar> (0, 128, 0));
+	Notes.addLayer("Imagen");
+	Notes.addLayer("Puntos");
+	Notes.addLayer("Lineas");
+	Notes.addLayer("Circulos");
+	Notes.addLayer("Marcadores");
 	
 
+	Notes.addImageFeature("Imagen", Base, idx++, Scalar_<uchar> (0, 128, 0));
+	
 	D.testDisplay();
-	imageLayer.applyFeatures(D.Main);
+	Notes.applyAnnotations(D.Main);
 	namedWindow("Display", WINDOW_GUI_EXPANDED);
 	imshow("Display", D.Display);
 	waitKeyEx(0);
@@ -49,7 +51,7 @@ int main()
 			y = random() % D.mainHeight;
 
 			dPoint p(x, y);
-			pointLayer.addPointFeature(p, idx++, Scalar_<uchar> (255,128,255));
+			Notes.addPointFeature("Puntos", p, idx++, Scalar_<uchar> (255,128,255));
 		}
 
 		for (i=0;i<2;++i)
@@ -62,7 +64,7 @@ int main()
 			y2 = random() % D.mainHeight;
 		
 			dLine l(x1, y1, x2, y2);
-			lineLayer.addLineFeature(l, idx++, cv::Scalar_<uchar> (96,0,128));
+			Notes.addLineFeature("Lineas", l, idx++, cv::Scalar_<uchar> (96,0,128));
 		}
 
 		for (i=0;i<1;++i)
@@ -74,7 +76,7 @@ int main()
 			r = random() % 100;
 		
 			dCircle c(x, y, r);
-			circleLayer.addCircleFeature(c, idx++, cv::Scalar_<uchar> (0,150,200));
+			Notes.addCircleFeature("Circulos", c, idx++, cv::Scalar_<uchar> (0,150,200));
 		}
 
 		for (i=0;i<1;++i)
@@ -85,18 +87,12 @@ int main()
 			y = random() % D.mainHeight;
 
 			dPoint p(x, y);
-			markerLayer.addMarkerFeature(p, idx++, cv::Scalar_<uchar> (146,114,0), cv::MARKER_TRIANGLE_UP);
+			Notes.addMarkerFeature("Marcadores", p, idx++, cv::Scalar_<uchar> (146,114,0), cv::MARKER_TRIANGLE_UP);
 		}
 
-		imageLayer.applyFeatures(D.Main);
-		pointLayer.applyFeatures(D.Main);
-		lineLayer.applyFeatures(D.Main);
-		circleLayer.applyFeatures(D.Main);
-		markerLayer.applyFeatures(D.Main);
-		
+		Notes.applyAnnotations(D.Main);
 				
 		cout << "Iteración #" << itNo << endl;
-		cout << "featureLayerSize: " << pointLayer.L.size() << endl << endl;
 		cout.flush();
 		
 		itNo++;

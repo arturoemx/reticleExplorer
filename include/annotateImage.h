@@ -1,11 +1,12 @@
 #ifndef __ANNOTATE_IMAGE__
-#define __ANNOTATE_IMAGW__
+#define __ANNOTATE_IMAGE__
 
 #include <math.h>
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <memory>
 #include <vector>
+#include <map>
 #include <drawingFeatures.h>
 
 namespace imNote
@@ -250,13 +251,12 @@ namespace imNote
 		}
 	};
 
-
 	struct annotation
 	{
 		int nLayers;
 		int rows, cols;
+		std::map<std::string,unsigned int> idxMap; 
 		std::vector<featureLayer> Features;
-		cv::Mat_<cv::Vec3b> topLayer;
 
 		annotation(int r, int c)
 		{
@@ -268,14 +268,76 @@ namespace imNote
 			}
 			rows = r;
 			cols = c;
-			topLayer = cv::Mat::zeros(rows, cols, CV_8UC3);
 			nLayers = 0;
 		}
-		void addLayer(std::string nme)
+		
+		void addLayer(std::string name)
 		{
-			featureLayer ly(nme, rows, cols);
+			unsigned int idx;
+			featureLayer ly(name, rows, cols);
+
+			idx = Features.size();
+			idxMap[name] = idx;
+
+			ly.active = true;
 
 			Features.push_back(ly);
+		}
+		void applyAnnotations(cv::Mat &I)
+		{
+			unsigned int i, N;
+
+			if (I.rows != rows || I.cols != cols || I.channels() != 3)
+			{
+				std::cerr <<"Error in annotation::applyAnnotation."
+				          << std:: endl << "Differente Image size."
+				          << std::endl;
+				return;
+			}
+
+			N = Features.size();
+			for (i = 0;i < N; ++i)
+				if (Features[i].active == true)
+					Features[i].applyFeatures(I);
+		}
+		void addImageFeature(std::string name, cv::Mat &I, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
+		{
+			unsigned int idx;
+
+			idx = idxMap[name];
+			Features[idx].addImageFeature(I, id, C);
+
+		}
+		void addPointFeature(std::string name, dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
+		{
+			unsigned int idx;
+
+			idx = idxMap[name];
+			Features[idx].addPointFeature(val, id, C);
+		}
+		
+		void addLineFeature(std::string name, dLine &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
+		{
+			unsigned int idx;
+
+			idx = idxMap[name];
+			Features[idx].addLineFeature(val, id, C);
+		}
+
+		void addCircleFeature(std::string name, dCircle &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255))
+		{
+			unsigned int idx;
+
+			idx = idxMap[name];
+			Features[idx].addCircleFeature(val, id, C);
+		}
+
+		void addMarkerFeature(std::string name, dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255), cv::MarkerTypes mt = cv::MARKER_CROSS)
+		{
+			unsigned int idx;
+
+			idx = idxMap[name];
+			Features[idx].addMarkerFeature(val, id, C);
 		}
 	};
 }
