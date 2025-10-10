@@ -95,7 +95,7 @@ namespace imNote
 		std::vector<std::shared_ptr<featureDescriptor>> L;
 		cv::Mat lyImage;
 
-		featureLayer(std::string nme, int _r, int _c);
+		featureLayer(const std::string &_name, int _r, int _c);
 		
 		void addImageFeature(cv::Mat &I, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 		
@@ -119,27 +119,33 @@ namespace imNote
 
 		annotation(int r, int c);
 				
-		void addLayer(std::string name);
+		void addLayer(const std::string &name);
+
+		unsigned int getLayerIdx(const std::string &name);
+
+		std::map<std::string, unsigned int>::iterator getLayerIterator(const std::string &name);
 		
-		void moveLayerUp(std::string name);
+		void moveLayerUp(const std::string &name);
 		
-		void moveLayerDown(std::string name);
+		void moveLayerDown(const std::string &name);
 		
-		void activateLayer(std::string name);
+		void activateLayer(const std::string &name);
 		
-		void deactivateLayer(std::string name);
+		void deactivateLayer(const std::string &name);
+
+		void toggleLayer(const std::string &name);
 		
 		void applyAnnotations(cv::Mat &I);
 		
-		void addImageFeature(std::string name, cv::Mat &I, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
+		void addImageFeature(const std::string &name, cv::Mat &I, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 		
-		void addPointFeature(std::string name, dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
+		void addPointFeature(const std::string &name, dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 				
-		void addLineFeature(std::string name, dLine &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
+		void addLineFeature(const std::string &name, dLine &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 		
-		void addCircleFeature(std::string name, dCircle &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
+		void addCircleFeature(const std::string &name, dCircle &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 		
-		void addMarkerFeature(std::string name, dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255), cv::MarkerTypes mt = cv::MARKER_CROSS);
+		void addMarkerFeature(const std::string &name, dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255), cv::MarkerTypes mt = cv::MARKER_CROSS);
 	};
 }
 #endif

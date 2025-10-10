@@ -9,10 +9,10 @@ INCLUDES = $(INCLUDEDIR)/reticleExplorer.h $(INCLUDEDIR)/showDisplay.h $(INCLUDE
 
 all: testShowDisplay reticleExplorer
 
-testShowDisplay: objs/testShowDisplay.o
+testShowDisplay: objs/testShowDisplay.o lib/libAnnotate.a
 	g++ $(CXXFLAGS) -o testShowDisplay objs/testShowDisplay.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs`
 
-reticleExplorer: objs/reticleExplorer.o
+reticleExplorer: objs/reticleExplorer.o lib/libAnnotate.a
 	g++ $(CXXFLAGS) -o reticleExplorer objs/reticleExplorer.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs` -lboost_filesystem
 
 objs/testShowDisplay.o: testShowDisplay.cpp $(INCLUDES)

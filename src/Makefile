@@ -7,7 +7,7 @@ INCLUDEDIR = -I $(TOPDIR)include `pkg-config --cflags opencv4`
 OBJDIR = ./objs/
 .SUFFIXES: .cpp
 
-CXXFLAGS += -g -Wall 
+CXXFLAGS += -g -Wall -D__VERBOSE__
 LIB = libAnnotate.a
 
 AVOID =
