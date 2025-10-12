@@ -213,25 +213,25 @@
 
 	/*************************************************************
 	 * 
-	 *   ANNOTATION
+	 *   ANNOTATIONS
 	 * 
 	 *************************************************************
 	 */
 
-	imNote::annotation::annotation(int r, int c)
+	imNote::annotations::annotations(int r, int c)
 	{
 		if (r <=0 || c <= 0)
 		{
-			std::cerr << "Error in annotation constructor." << std::endl;
+			std::cerr << "Error in annotations constructor." << std::endl;
 			std::cerr.flush();
 			return;
 		}
 		rows = r;
 		cols = c;
-		nLayers = 0;
+		featureIdx = 0;
 	}
 	
-	void imNote::annotation::addLayer(const std::string &name)
+	void imNote::annotations::addLayer(const std::string &name)
 	{
 		unsigned int idx;
 		featureLayer ly(name, rows, cols);
@@ -244,7 +244,7 @@
 		Features.push_back(ly);
 	}
 
-	unsigned int imNote::annotation::getLayerIdx(const std::string &name)
+	unsigned int imNote::annotations::getLayerIdx(const std::string &name)
 	{
 		unsigned int idx;
 
@@ -254,14 +254,14 @@
 		}
 		catch(std::out_of_range& e)
 		{
-			std::cerr << "Error: annotation::getLayerIdx " << e.what() << "=> key out of range: "<< std::endl;
+			std::cerr << "Error: annotations::getLayerIdx " << e.what() << "=> key out of range: "<< std::endl;
 			throw;
 			return idxMap.size();
 		}
 		return idx;
 	}
 
-	std::map<std::string, unsigned int>::iterator imNote::annotation::getLayerIterator(const std::string &name)
+	std::map<std::string, unsigned int>::iterator imNote::annotations::getLayerIterator(const std::string &name)
 	{
 		std::map<std::string, unsigned int>::iterator it;
 
@@ -271,7 +271,7 @@
 		}
 		catch(std::out_of_range& e)
 		{
-			std::cerr << "Error: annotation::getLayerIterator("<< name << ") " << e.what()
+			std::cerr << "Error: annotations::getLayerIterator("<< name << ") " << e.what()
 			          << "=> key out of range: "<< std::endl;
 			throw;
 			return idxMap.end();
@@ -279,7 +279,7 @@
 		return it;
 	}
 
-	void imNote::annotation::moveLayerUp(const std::string &name)
+	void imNote::annotations::moveLayerUp(const std::string &name)
 	{
 		unsigned int idx;
 		std::vector<featureLayer>::iterator it, itPrev;
@@ -292,7 +292,7 @@
 		catch(std::exception &e)
 		{
 			std::cerr << "Couldn't move up Layer " << name
-			          << ", it doesnt exist." << endl;
+			          << ", it doesnt exist." << std::endl;
 			return;
 		}
 
@@ -300,7 +300,7 @@
 		{
 #ifdef __VERBOSE__
 		std::cerr << "Couldn't move up Layer " << name
-			          << ", already on top." << endl;
+			          << ", already on top." << std::endl;
 #endif
 			return;
 		}
@@ -314,7 +314,7 @@
 		idxMap[tmpName] = idx;
 	}
 
-	void imNote::annotation::moveLayerDown(const std::string &name)
+	void imNote::annotations::moveLayerDown(const std::string &name)
 	{
 		unsigned int idx;
 		std::vector<featureLayer>::iterator it, itNext;
@@ -327,7 +327,7 @@
 		catch(std::exception &e)
 		{
 			std::cerr << "Couldn't move down Layer " << name
-			          << ", it doesnt exist." << endl;
+			          << ", it doesnt exist." << std::endl;
 			return;
 		}
 
@@ -335,7 +335,7 @@
 			{
 #ifdef __VERBOSE__
 		std::cerr << "Couldn't move down Layer " << name
-			          << ", already at the bottom." << endl;	
+			          << ", already at the bottom." << std::endl;	
 #endif
 			return;
 		}
@@ -351,7 +351,7 @@
 
 
 
-	void imNote::annotation::activateLayer(const std::string &name)
+	void imNote::annotations::activateLayer(const std::string &name)
 	{
 		unsigned int idx;
 
@@ -369,7 +369,7 @@
 		Features[idx].active = true;
 	}
 
-	void imNote::annotation::deactivateLayer(const std::string &name)
+	void imNote::annotations::deactivateLayer(const std::string &name)
 	{
 		unsigned int idx;
 
@@ -387,7 +387,7 @@
 		Features[idx].active = false;
 	}
 
-	void imNote::annotation::toggleLayer(const std::string &name)
+	void imNote::annotations::toggleLayer(const std::string &name)
 	{
 		unsigned int idx;
 
@@ -408,14 +408,14 @@
 			Features[idx].active = true;
 	}
 
-	void imNote::annotation::applyAnnotations(cv::Mat &I)
+	void imNote::annotations::applyAnnotations(cv::Mat &I)
 	{
 		unsigned int i, N;
 
 		if (I.rows != rows || I.cols != cols || I.channels() != 3)
 		{
-			std::cerr <<"Error in annotation::applyAnnotation."
-			          << std:: endl << "Differente Image size."
+			std::cerr <<"Error in annotations::applyAnnotation."
+			          << std::endl << "Differente Image size."
 			          << std::endl;
 			return;
 		}
@@ -426,38 +426,38 @@
 				Features[i].applyFeatures(I);
 	}
 
-	void imNote::annotation::addImageFeature(const std::string &name, cv::Mat &I, u_int id, cv::Scalar_<uchar> C)
+	void imNote::annotations::addImageFeature(const std::string &name, cv::Mat &I, cv::Scalar_<uchar> C)
 	{
 		unsigned int idx = getLayerIdx(name);
 
-		Features[idx].addImageFeature(I, id, C);
+		Features[idx].addImageFeature(I, featureIdx++, C);
 
 	}
 
-	void imNote::annotation::addPointFeature(const std::string &name, dPoint &val, u_int id, cv::Scalar_<uchar> C)
+	void imNote::annotations::addPointFeature(const std::string &name, dPoint &val, cv::Scalar_<uchar> C)
 	{
 		unsigned int idx = getLayerIdx(name);
 
-		Features[idx].addPointFeature(val, id, C);
+		Features[idx].addPointFeature(val, featureIdx++, C);
 	}
 	
-	void imNote::annotation::addLineFeature(const std::string &name, dLine &val, u_int id, cv::Scalar_<uchar> C)
+	void imNote::annotations::addLineFeature(const std::string &name, dLine &val, cv::Scalar_<uchar> C)
 	{
 		unsigned int idx = getLayerIdx(name);
 
-		Features[idx].addLineFeature(val, id, C);
+		Features[idx].addLineFeature(val, featureIdx++, C);
 	}
 
-	void imNote::annotation::addCircleFeature(const std::string &name, dCircle &val, u_int id, cv::Scalar_<uchar> C)
+	void imNote::annotations::addCircleFeature(const std::string &name, dCircle &val, cv::Scalar_<uchar> C)
 	{
 		unsigned int idx = getLayerIdx(name);
 
-		Features[idx].addCircleFeature(val, id, C);
+		Features[idx].addCircleFeature(val, featureIdx++, C);
 	}
 
-	void imNote::annotation::addMarkerFeature(const std::string &name, dPoint &val, u_int id, cv::Scalar_<uchar> C, cv::MarkerTypes mt)
+	void imNote::annotations::addMarkerFeature(const std::string &name, dPoint &val, cv::Scalar_<uchar> C, cv::MarkerTypes mt)
 	{
 		unsigned int idx = getLayerIdx(name);
 
-		Features[idx].addMarkerFeature(val, id, C);
+		Features[idx].addMarkerFeature(val, featureIdx++, C);
 	}

@@ -1,7 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <showDisplay.h>
-#include <reticleExplorer.h>
 #include <mFrame.h>
+#include <annotateImage.h>
 #include <vector>
 #include <string>
 #include <boost/filesystem.hpp>
@@ -10,12 +10,52 @@ using namespace std;
 using namespace cv;
 using namespace boost::filesystem;
 using namespace shDisp;
+using namespace imNote;
 
 
 #ifdef QT
 enum KeyCodes {Esc=27, KeyUp=65362, KeyLeft=65361, KeyDown=65364, KeyRight=65363, Key_p=112, Key_P=80};
 #endif
 
+struct reticleParams
+{
+	//Threshold Parameters
+	int brightThr;
+
+	//Canny_Parameters
+	int lowThr, highThr;
+	int CannyAppertureSize;
+	bool L2Gradient;
+
+	//Hough Parameters
+	double rho;
+	double theta;
+	int voteThr;
+
+	reticleParams(uint bThr, uint lThr, uint hThr, int CAP, bool L2G, double _rho, double _theta, int _vThr)
+	{
+		brightThr = bThr;
+		lowThr = lThr;
+		highThr = hThr;
+		CannyAppertureSize = CAP;
+		L2Gradient = L2G;
+		rho  = _rho;
+		theta = _theta;
+		voteThr = _vThr;
+	}
+	
+	reticleParams()
+	{
+		brightThr = 127;
+		lowThr = 127;
+		highThr = 128;
+		CannyAppertureSize = 3;
+		L2Gradient = true;
+		rho  = 0.25; // one fourth of a pixel.
+		theta = M_PI/360; //0.5 degrees
+		voteThr = 150;
+	}	
+};
 
 struct pathTStamp
 {
@@ -23,12 +63,10 @@ struct pathTStamp
 	string timeStamp;
 };
 
-void processImage(reticleParams &prm, cv::Mat I, vector<Vec3f> &Lines)
+void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
 {
-	Mat Gray, Binary, Edges;
-
-	//Convierte a tonos de gris.
-	cvtColor(I, Gray, COLOR_BGR2GRAY);
+	Mat Binary, Edges;
+	vector<Vec4i> lines;
 
 	//Umbraliza
 	if (prm.brightThr > 0)
@@ -38,10 +76,17 @@ void processImage(reticleParams &prm, cv::Mat I, vector<Vec3f> &Lines)
 			threshold(Gray, Binary, prm.brightThr, 255, THRESH_OTSU);
 		else
 			adaptiveThreshold 	(Gray, Binary, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 11, 0);
+
+	Feat.addLayer("Binary");
+	Feat.addImageFeature("Binary", Binary, Scalar_<uchar> (0, 128, 0));
 	
 	//Encuentra Bordes.
 	Canny (Binary, Edges, prm.lowThr, prm.highThr, prm.CannyAppertureSize, prm.L2Gradient);
-	HoughLines (Edges, Lines, prm.rho, prm.theta, prm.voteThr);
+
+	Feat.addLayer("Edges");
+	Feat.addImageFeature("Edges", Binary, Scalar_<uchar> (0, 128, 128));
+
+	HoughLinesP (Edges, lines, prm.rho, prm.theta, prm.voteThr);
 }
 
 void loadParseFileNames(string dirName, vector<pathTStamp> &fNm)
@@ -75,9 +120,8 @@ int main(int argc, char **argv)
 	bool running = true;
 	KeyCodes key;
 	reticleParams rPrms;
+	Mat Gray;
 
-	vector<Vec3f> Lines;
-	
 	showDisplay D;
 	
 	if (argc < 2)
@@ -123,6 +167,8 @@ int main(int argc, char **argv)
 #endif
 
 	
+	annotations Features(Images[0].Frame.rows, Images[0].Frame.cols);
+
 	namedWindow("Display", WINDOW_GUI_EXPANDED);
 	
 	D.testDisplay();
@@ -143,11 +189,13 @@ int main(int argc, char **argv)
     			break;
     		case Key_p:
     		case Key_P: 
-    			processImage(rPrms, Images[idx].Frame, Lines);
-    			cout << "Se encontraron " << Lines.size() << " Lineas." << endl;
+    			//Convierte a tonos de gris.
+				cvtColor(Images[idx].Frame, Gray, COLOR_BGR2GRAY);
+    			processImage(rPrms, Gray, Features);
+    	/*		cout << "Se encontraron " << Lines.size() << " Lineas." << endl;
     			for (long unsigned i=0;i<Lines.size();i++)
     				cout << "Linea[" << i << "]=" << Lines[i] << endl;
-    			cout << endl;
+    			cout << endl;*/
     			break;
     		case Esc: running = false; break;
     		default:break;

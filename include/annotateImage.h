@@ -110,14 +110,14 @@ namespace imNote
 		void applyFeatures(cv::Mat &I);
 	};
 
-	struct annotation
+	struct annotations
 	{
-		int nLayers;
+		unsigned int featureIdx;
 		int rows, cols;
 		std::map<std::string,unsigned int> idxMap; 
 		std::vector<featureLayer> Features;
 
-		annotation(int r, int c);
+		annotations(int r, int c);
 				
 		void addLayer(const std::string &name);
 
@@ -137,15 +137,15 @@ namespace imNote
 		
 		void applyAnnotations(cv::Mat &I);
 		
-		void addImageFeature(const std::string &name, cv::Mat &I, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
+		void addImageFeature(const std::string &name, cv::Mat &I, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 		
-		void addPointFeature(const std::string &name, dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
+		void addPointFeature(const std::string &name, dPoint &val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 				
-		void addLineFeature(const std::string &name, dLine &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
+		void addLineFeature(const std::string &name, dLine &val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 		
-		void addCircleFeature(const std::string &name, dCircle &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
+		void addCircleFeature(const std::string &name, dCircle &val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 		
-		void addMarkerFeature(const std::string &name, dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255), cv::MarkerTypes mt = cv::MARKER_CROSS);
+		void addMarkerFeature(const std::string &name, dPoint &val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255), cv::MarkerTypes mt = cv::MARKER_CROSS);
 	};
 }
 #endif

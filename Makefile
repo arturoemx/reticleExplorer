@@ -4,7 +4,7 @@ INCLUDEDIR = ./include
 LIBDIR = ./lib
 CXXFLAGS = -Wall -g -I $(INCLUDEDIR) -DQT
 
-INCLUDES = $(INCLUDEDIR)/reticleExplorer.h $(INCLUDEDIR)/showDisplay.h $(INCLUDEDIR)/geomFeatures.h $(INCLUDEDIR)/drawingFeatures.h $(INCLUDEDIR)/annotateImage.h  
+INCLUDES = $(INCLUDEDIR)/showDisplay.h $(INCLUDEDIR)/geomFeatures.h $(INCLUDEDIR)/drawingFeatures.h $(INCLUDEDIR)/annotateImage.h  
 
 
 all: testShowDisplay reticleExplorer

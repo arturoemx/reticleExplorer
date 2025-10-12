@@ -10,7 +10,7 @@ using namespace imNote;
 
 int main()
 {
-	uint idx = 0, i;
+	uint i;
 	int keyVal;
 	uint itNo = 0;
 	cv::Mat Base;
@@ -19,7 +19,7 @@ int main()
 
 	Base = imread("images/JaguarUmbralizado.png", IMREAD_GRAYSCALE);
 	
-	annotation Notes(Base.rows, Base.cols);
+	annotations Notes(Base.rows, Base.cols);
 
 	Notes.addLayer("Imagen");
 	Notes.addLayer("Puntos");
@@ -44,34 +44,36 @@ int main()
 		try	{idx  = Notes.getLayerIdx("Cuadrados");}
 		catch(out_of_range &e) {idx = Notes.Features.size();};
 		cout << "La capa 'Cuadrados' tiene el índice " << idx << endl << endl;
+	
+
+		for (idx = 0; idx<Notes.Features.size(); ++idx)
+		{
+			cout << "Notes.Features[" << idx << "].name = "
+			     << Notes.Features[idx].name << endl
+			     << "idxMap[" << Notes.Features[idx].name << "] = "
+			     << Notes.Features[idx].name << endl << endl;
+		}
+
+		Notes.moveLayerUp("Lineas");
+		Notes.moveLayerDown("Puntos");
+
+		Notes.moveLayerDown("Astros");
+
+		cout << endl << endl;
+
+		for (idx = 0; idx<Notes.Features.size(); ++idx)
+		{
+			cout << "Notes.Features[" << idx << "].name = "
+			     << Notes.Features[idx].name << endl
+			     << "idxMap[" << Notes.Features[idx].name << "] = "
+			     << Notes.Features[idx].name << endl << endl;
+		}
+
+		cout << endl << endl;
 	}
 
-	for (idx = 0; idx<Notes.Features.size(); ++idx)
-	{
-		cout << "Notes.Features[" << idx << "].name = "
-		     << Notes.Features[idx].name << endl
-		     << "idxMap[" << Notes.Features[idx].name << "] = "
-		     << Notes.Features[idx].name << endl << endl;
-	}
 
-	Notes.moveLayerUp("Lineas");
-	Notes.moveLayerDown("Puntos");
-
-	Notes.moveLayerDown("Astros");
-
-	cout << endl << endl;
-
-	for (idx = 0; idx<Notes.Features.size(); ++idx)
-	{
-		cout << "Notes.Features[" << idx << "].name = "
-		     << Notes.Features[idx].name << endl
-		     << "idxMap[" << Notes.Features[idx].name << "] = "
-		     << Notes.Features[idx].name << endl << endl;
-	}
-
-	cout << endl << endl;
-
-	Notes.addImageFeature("Imagen", Base, idx++, Scalar_<uchar> (0, 128, 0));
+	Notes.addImageFeature("Imagen", Base, Scalar_<uchar> (0, 128, 0));
 	
 	D.testDisplay();
 	Notes.applyAnnotations(D.Main);
@@ -127,7 +129,7 @@ int main()
 			y = random() % D.mainHeight;
 
 			dPoint p(x, y);
-			Notes.addPointFeature("Puntos", p, idx++, Scalar_<uchar> (255,128,255));
+			Notes.addPointFeature("Puntos", p, Scalar_<uchar> (255,128,255));
 		}
 
 		for (i=0;i<2;++i)
@@ -140,7 +142,7 @@ int main()
 			y2 = random() % D.mainHeight;
 		
 			dLine l(x1, y1, x2, y2);
-			Notes.addLineFeature("Lineas", l, idx++, cv::Scalar_<uchar> (96,0,128));
+			Notes.addLineFeature("Lineas", l, cv::Scalar_<uchar> (96,0,128));
 		}
 
 		for (i=0;i<1;++i)
@@ -152,7 +154,7 @@ int main()
 			r = random() % 100;
 		
 			dCircle c(x, y, r);
-			Notes.addCircleFeature("Circulos", c, idx++, cv::Scalar_<uchar> (0,150,200));
+			Notes.addCircleFeature("Circulos", c, cv::Scalar_<uchar> (0,150,200));
 		}
 
 		for (i=0;i<1;++i)
@@ -163,7 +165,7 @@ int main()
 			y = random() % D.mainHeight;
 
 			dPoint p(x, y);
-			Notes.addMarkerFeature("Marcadores", p, idx++, cv::Scalar_<uchar> (146,114,0), cv::MARKER_TRIANGLE_UP);
+			Notes.addMarkerFeature("Marcadores", p, cv::Scalar_<uchar> (146,114,0), cv::MARKER_TRIANGLE_UP);
 		}
 
 		Notes.applyAnnotations(D.Main);
