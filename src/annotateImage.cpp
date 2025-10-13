@@ -257,19 +257,20 @@
 
 	std::ostream &imNote::operator<<(std::ostream &s, imNote::featureLayer &fL)
 	{
+		int i, tope;
 		imNote::featureDescriptor *ptr;
-		std::vector<std::shared_ptr<imNote::featureDescriptor>>::iterator it, end;
+		std::vector<std::shared_ptr<imNote::featureDescriptor>>::iterator it;
 
 		s << "Feature Layer Name: " << fL.name << std::endl;
 		if (fL.active == true)
 			s <<  "Active!"  << std::endl;
 		else
 			s <<  "Active!" << std::endl;
-        s << "No. of features   : " << fL.L.size() << std::endl << "Features: ";
+        s << "No. of features   : " << fL.L.size() << std::endl << "Features: [";
 
 		it = fL.L.begin();
-		end = fL.L.end();
-		for (; it != end; ++it)
+		tope = (int)fL.L.size();
+		for (i = 0; i < tope; ++it, ++i)
 		{
 			ptr = it->get();
 
@@ -291,6 +292,11 @@
 					s << *((imNote::markerFeature *)ptr);
 				default:break;
 			}
+			if (i + 1 < tope)
+				s << ",";
+			else
+				s << "]";
+
 		}
 		return s;
 	}
@@ -511,7 +517,8 @@
 		{
 			std::cerr <<"Error in annotations::applyAnnotation."
 			          << std::endl << "Differente Image size."
-			          << std::endl;
+			          << std::endl
+			          << "[" << I.rows << " ," << I.cols << ", " << I.channels() << "]" << std::endl;
 			return;
 		}
 

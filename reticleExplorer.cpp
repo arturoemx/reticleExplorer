@@ -31,8 +31,9 @@ struct reticleParams
 	double rho;
 	double theta;
 	int voteThr;
+	int minLineLength;
 
-	reticleParams(uint bThr, uint lThr, uint hThr, int CAP, bool L2G, double _rho, double _theta, int _vThr)
+	reticleParams(uint bThr, uint lThr, uint hThr, int CAP, bool L2G, double _rho, double _theta, int _vThr, int minLL)
 	{
 		brightThr = bThr;
 		lowThr = lThr;
@@ -42,18 +43,20 @@ struct reticleParams
 		rho  = _rho;
 		theta = _theta;
 		voteThr = _vThr;
+		minLineLength = minLL;
 	}
 	
 	reticleParams()
 	{
-		brightThr = 127;
+		brightThr = 219;
 		lowThr = 127;
 		highThr = 128;
 		CannyAppertureSize = 3;
 		L2Gradient = true;
 		rho  = 0.25; // one fourth of a pixel.
 		theta = M_PI/360; //0.5 degrees
-		voteThr = 150;
+		voteThr = 15;
+		minLineLength = 10;
 	}	
 };
 
@@ -62,32 +65,6 @@ struct pathTStamp
 	string path;
 	string timeStamp;
 };
-
-void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
-{
-	Mat Binary, Edges;
-	vector<Vec4i> lines;
-
-	//Umbraliza
-	if (prm.brightThr > 0)
-		threshold(Gray, Binary, prm.brightThr, 255, THRESH_BINARY);
-	else
-		if (prm.brightThr > 0)
-			threshold(Gray, Binary, prm.brightThr, 255, THRESH_OTSU);
-		else
-			adaptiveThreshold 	(Gray, Binary, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 11, 0);
-
-	Feat.addLayer("Binary");
-	Feat.addImageFeature("Binary", Binary, Scalar_<uchar> (0, 128, 0));
-	
-	//Encuentra Bordes.
-	Canny (Binary, Edges, prm.lowThr, prm.highThr, prm.CannyAppertureSize, prm.L2Gradient);
-
-	Feat.addLayer("Edges");
-	Feat.addImageFeature("Edges", Binary, Scalar_<uchar> (0, 128, 128));
-
-	HoughLinesP (Edges, lines, prm.rho, prm.theta, prm.voteThr);
-}
 
 void loadParseFileNames(string dirName, vector<pathTStamp> &fNm)
 {
@@ -110,6 +87,47 @@ void loadParseFileNames(string dirName, vector<pathTStamp> &fNm)
     }
 }
 
+
+void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
+{
+	Mat Binary, Edges;
+	vector<Vec4f> lines;
+	vector<Vec4f>::iterator itL, endL;
+
+	//Umbraliza
+	if (prm.brightThr > 0)
+		threshold(Gray, Binary, prm.brightThr, 255, THRESH_BINARY);
+	else
+		if (prm.brightThr > 0)
+			threshold(Gray, Binary, prm.brightThr, 255, THRESH_OTSU);
+		else
+			adaptiveThreshold 	(Gray, Binary, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 11, 0);
+
+	Feat.addLayer("Binary");
+	Feat.addImageFeature("Binary", Binary, Scalar_<uchar> (0, 128, 0));
+	
+	//Encuentra Bordes.
+	Canny (Binary, Edges, prm.lowThr, prm.highThr, prm.CannyAppertureSize, prm.L2Gradient);
+
+	Feat.addLayer("Edges");
+	Feat.addImageFeature("Edges", Binary, Scalar_<uchar> (255, 255, 0));
+
+	
+	HoughLinesP (Edges, lines, prm.rho, prm.theta, prm.voteThr, prm.minLineLength);
+
+	Feat.addLayer("Lines");
+	itL = lines.begin();
+	endL = lines.end();
+	for (;itL != endL;++itL)
+	{
+		dLine dL((*itL)[0],(*itL)[1],(*itL)[2],(*itL)[3]);
+		dL.setThickness(3);
+
+		Feat.addLineFeature("Lines", dL, Scalar_<uchar> (0, 196, 0));
+	}
+}
+
+
 int main(int argc, char **argv)
 {
 	vector<pathTStamp> fileNames;
@@ -117,7 +135,7 @@ int main(int argc, char **argv)
 	vector <mFrame> Images;
 	vector<annotations> Notes;
 	string dirName;
-	u_int idx, firstImage = 0, lastImage = 0, nImages = 0;
+	u_int idx, idxName, firstImage = 0, lastImage = 0, nImages = 0;
 	bool running = true;
 	KeyCodes key;
 	reticleParams rPrms;
@@ -152,15 +170,15 @@ int main(int argc, char **argv)
 #ifdef __verbose__
 	cout << "loading " << nImages + 1 << " Images" << endl;
 #endif
-	for (idx = firstImage, itp = fileNames.begin() + firstImage; idx <= lastImage && itp != fileNames.end(); ++itp, ++idx)
+	for (idx = 0, idxName = firstImage, itp = fileNames.begin() + firstImage; idxName <= lastImage && itp != fileNames.end(); ++itp, ++idx, ++idxName)
 	{
 		mFrame mF;
 
 #ifdef __verbose__
-		cout << "Path[" << idx << "]     :  " << itp->path << endl
-             << "timestamp[" << idx << "]:  " << itp->timeStamp << endl << endl;
+		cout << "Path[" << idxName << "]     :  " << itp->path << endl
+             << "timestamp[" << idxName << "]:  " << itp->timeStamp << endl << endl;
 #endif
-        Images.insert(Images.begin(), mFrame(itp->path, stod(itp->timeStamp)));
+        Images.insert(Images.begin()+idx, mFrame(itp->path, stod(itp->timeStamp)));
         Notes.insert(Notes.begin(), annotations(Images[idx].Frame.rows, Images[idx].Frame.cols));
 	}
 
@@ -201,6 +219,8 @@ int main(int argc, char **argv)
 				cvtColor(Images[idx].Frame, Gray, COLOR_BGR2GRAY);
     			processImage(rPrms, Gray, Notes[idx]);
     			cvtColor(Gray,dGray,COLOR_GRAY2RGB);
+    			//imwrite("Gray.png", Gray);
+    			Notes[idx].applyAnnotations(dGray);
     			D.setMain(dGray);
     			imshow("Display", D.Display);
     			waitKeyEx(1);
@@ -211,6 +231,7 @@ int main(int argc, char **argv)
     				cout << "FeatureLayer[" << i << "] = " << Notes[idx].Features[i] << endl << endl
     				     <<  "**************************************************"
     			         << endl << endl;
+
     			break;
     		case Esc:
     			running = false;

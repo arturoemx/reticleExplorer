@@ -20,6 +20,10 @@ struct dPoint: public gfeat::point2D, public drawingFeatures
 	dPoint():point2D(){}
 	
 	dPoint(float _x, float _y, float _w = 1):point2D(_x, _y, _w){}
+
+	dPoint(cv::Vec2f &v):point2D(v){}
+	
+	dPoint(cv::Vec3f &v):point2D(v){}
 };
 
 std::ostream &operator<< (std::ostream &s, dPoint &p);
@@ -29,8 +33,14 @@ struct dLine: public gfeat::line2D, public drawingFeatures
 	dLine():line2D(){}
 	
 	dLine(float _A, float _B, float _C):line2D(_A, _B, _C){}
-	
+
 	dLine(float x1, float y1, float x2, float y2):line2D(x1, y1, x2, y2){}
+
+	dLine(cv::Vec2f &v):line2D(v){}
+
+	dLine(cv::Vec3f &v):line2D(v){}
+
+	dLine(cv::Vec4f &v):line2D(v){}
 };
 
 std::ostream &operator<< (std::ostream &s, dLine &l);
