@@ -115,12 +115,13 @@ int main(int argc, char **argv)
 	vector<pathTStamp> fileNames;
 	vector<pathTStamp>::iterator itp;
 	vector <mFrame> Images;
+	vector<annotations> Notes;
 	string dirName;
 	u_int idx, firstImage = 0, lastImage = 0, nImages = 0;
 	bool running = true;
 	KeyCodes key;
 	reticleParams rPrms;
-	Mat Gray;
+	Mat Gray, dGray;
 
 	showDisplay D;
 	
@@ -160,45 +161,64 @@ int main(int argc, char **argv)
              << "timestamp[" << idx << "]:  " << itp->timeStamp << endl << endl;
 #endif
         Images.insert(Images.begin(), mFrame(itp->path, stod(itp->timeStamp)));
+        Notes.insert(Notes.begin(), annotations(Images[idx].Frame.rows, Images[idx].Frame.cols));
 	}
 
 #ifdef __verbose__	
     cout << endl;
 #endif
 
-	
-	annotations Features(Images[0].Frame.rows, Images[0].Frame.cols);
 
 	namedWindow("Display", WINDOW_GUI_EXPANDED);
 	
 	D.testDisplay();
 	idx = 0;
+	D.setMain(Images[idx].Frame);
+    imshow("Display", D.Display);
     do
     {
-    	D.setMain(Images[idx].Frame);
-    	imshow("Display", D.Display);
     	key = (KeyCodes)(waitKeyEx(0) & 0x0000FFFF);
-    	cout << "Key:" << key << endl;
+    	
     	switch (key)
     	{
     		case KeyUp:
+    			cout << "Retreat"<< endl; cout.flush();
     			idx = idx > 0 ? idx-1 : idx;
+    			D.setMain(Images[idx].Frame);
+    			imshow("Display", D.Display);
+    			waitKeyEx(1);
     			break;
     		case KeyDown:
+    			cout << "Advance"<< endl; cout.flush();
     			idx = idx < nImages-1 ? idx+1 : idx;
+    			D.setMain(Images[idx].Frame);
+    			imshow("Display", D.Display);
+    			waitKeyEx(1);
     			break;
     		case Key_p:
     		case Key_P: 
     			//Convierte a tonos de gris.
 				cvtColor(Images[idx].Frame, Gray, COLOR_BGR2GRAY);
-    			processImage(rPrms, Gray, Features);
-    	/*		cout << "Se encontraron " << Lines.size() << " Lineas." << endl;
-    			for (long unsigned i=0;i<Lines.size();i++)
-    				cout << "Linea[" << i << "]=" << Lines[i] << endl;
-    			cout << endl;*/
+    			processImage(rPrms, Gray, Notes[idx]);
+    			cvtColor(Gray,dGray,COLOR_GRAY2RGB);
+    			D.setMain(dGray);
+    			imshow("Display", D.Display);
+    			waitKeyEx(1);
+
+    			cout << "Gray.channels = " << Gray.channels() << endl;
+    			cout << "dGray.channels = " << dGray.channels() << endl;
+    			for (long unsigned int i = 0; i < Notes[idx].Features.size(); ++i)
+    				cout << "FeatureLayer[" << i << "] = " << Notes[idx].Features[i] << endl << endl
+    				     <<  "**************************************************"
+    			         << endl << endl;
     			break;
-    		case Esc: running = false; break;
-    		default:break;
+    		case Esc:
+    			running = false;
+    			break;
+    		default:
+    			cout << "Key:" << key << endl;
+    			cout.flush();
+    			break;
     	}
 
     } while (running);

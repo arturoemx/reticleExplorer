@@ -27,7 +27,7 @@
 
 	void imNote::imageFeature::set(cv::Mat &I)
 	{
-		feature = I;
+		ftre = I;
 	}
 
 	void imNote::imageFeature::apply(cv::Mat &I)
@@ -38,13 +38,19 @@
 
 		for (i=0; i < I.rows; ++i)
 		{
-			apuF = feature.ptr<uchar>(i);
+			apuF = ftre.ptr<uchar>(i);
 			apuI  = I.ptr<cv::Vec3b>(i);
 			endI  = apuI + I.cols;
 			for (;apuI < endI; ++apuI, ++apuF)
 				if (*apuF)
 					*apuI = Color;
 		}
+	}
+
+	std::ostream &imNote::operator<< (std::ostream &s, imNote::imageFeature &iF)
+	{
+		s << "Img:[" << iF.ftre.rows << "x" << iF.ftre.cols << "x" << iF.ftre.channels() <<"]";
+		return s;
 	}
 
 	imNote::pointFeature::pointFeature(uint val, cv::Scalar_<uchar> C):imNote::featureDescriptor(val, C)
@@ -60,7 +66,11 @@
 		I.at<cv::Vec3b>((int)rintf(ftre.cy), (int)rintf(ftre.cx)) = Color;
 	}
 
-
+	std::ostream &imNote::operator<< (std::ostream &s, imNote::pointFeature &pF)
+	{
+		s << pF.ftre;
+		return s;
+	}
 
 	imNote::lineFeature::lineFeature(uint val, cv::Scalar_<uchar> C):imNote::featureDescriptor(val, C)
 	{
@@ -81,6 +91,12 @@
 		//else to Be Done Case of unbounded line.
 	}
 
+	std::ostream &imNote::operator<< (std::ostream &s, imNote::lineFeature &lF)
+	{
+		s << lF.ftre;
+		return s;
+	}
+
 	imNote::circleFeature::circleFeature(uint val, cv::Scalar_<uchar> C):imNote::featureDescriptor(val, C)
 	{
 		type = circle;
@@ -94,6 +110,12 @@
 	void imNote::circleFeature::apply(cv::Mat &I)
 	{
 		cv::circle(I, cv::Point((int)rint(ftre.h), (int)rint(ftre.k)), (int)rint(ftre.r), Color, ftre.thickness, ftre.lineType);
+	}
+
+	std::ostream &imNote::operator<< (std::ostream &s, imNote::circleFeature &cF)
+	{
+		s << cF.ftre;
+		return s;
 	}
 
 	imNote::markerFeature::markerFeature(uint val, cv::Scalar_<uchar> C, cv::MarkerTypes mt):imNote::featureDescriptor(val, C)
@@ -129,21 +151,44 @@
 		cv::drawMarker(I, cv::Point((int)rint(ftre.cx), (int)rint(ftre.cy)), Color, mType, mSize, ftre.thickness, ftre.lineType);
 	}
 
+	std::ostream &imNote::operator <<(std::ostream &s, imNote::markerFeature &mF)
+	{
+		s << mF.ftre << "|";
+		switch (mF.mType)
+		{
+			case cv::MARKER_CROSS:
+				s << "CROSS1";
+				break;
+			case cv::MARKER_TILTED_CROSS:
+				s << "CROSS2";
+				break;
+			case cv::MARKER_STAR:
+				s << "STAR  ";
+				break;
+			case cv::MARKER_DIAMOND:
+				s << "DIAMND";
+				break;
+			case cv::MARKER_SQUARE:
+				s << "SQUARE";
+				break;
+			case cv::MARKER_TRIANGLE_UP:
+				s << "TRIUP ";
+				break;
+			case cv::MARKER_TRIANGLE_DOWN:
+				s << "TRIDWN";
+				break;
+		}
+		return s;
+	}
+
 	imNote::featureLayer::featureLayer(const std::string &_name, int _r, int _c)
 	{	
 		name = _name;
 		active = false;
-		lyImage = cv::Mat::zeros(_r, _c, CV_8UC3);
 	}
 
 	void imNote::featureLayer::addImageFeature(cv::Mat &I, u_int id, cv::Scalar_<uchar> C)
 	{
-		if (I.rows != lyImage.rows || I.cols != lyImage.cols || I.channels() != 1)
-		{
-			std::cerr << "Error in addImageFeature" << std::endl;
-			std::cerr.flush();
-			return;
-		}
 		std::shared_ptr<imageFeature> ptr(new imageFeature(id, C));
 		ptr->set(I);
 		L.push_back(ptr);
@@ -210,6 +255,46 @@
 		}
 	}
 
+	std::ostream &imNote::operator<<(std::ostream &s, imNote::featureLayer &fL)
+	{
+		imNote::featureDescriptor *ptr;
+		std::vector<std::shared_ptr<imNote::featureDescriptor>>::iterator it, end;
+
+		s << "Feature Layer Name: " << fL.name << std::endl;
+		if (fL.active == true)
+			s <<  "Active!"  << std::endl;
+		else
+			s <<  "Active!" << std::endl;
+        s << "No. of features   : " << fL.L.size() << std::endl << "Features: ";
+
+		it = fL.L.begin();
+		end = fL.L.end();
+		for (; it != end; ++it)
+		{
+			ptr = it->get();
+
+	        switch(ptr->type)
+			{
+				case image:			
+					s << *((imNote::imageFeature *)ptr);
+					break;
+				case point:
+					s << *((imNote::pointFeature *)ptr);
+					break;
+				case line:
+					s << *((imNote::lineFeature *)ptr);
+					break;
+				case circle:
+					s << *((imNote::circleFeature *)ptr);
+					break;	
+				case marker:
+					s << *((imNote::markerFeature *)ptr);
+				default:break;
+			}
+		}
+		return s;
+	}
+
 
 	/*************************************************************
 	 * 
@@ -234,14 +319,24 @@
 	void imNote::annotations::addLayer(const std::string &name)
 	{
 		unsigned int idx;
-		featureLayer ly(name, rows, cols);
+		
 
-		idx = Features.size();
-		idxMap[name] = idx;
+		try
+		{
+			idx = idxMap.at(name);
+		}
+		catch(std::out_of_range& e)
+		{
+			featureLayer ly(name, rows, cols);
 
-		ly.active = true;
-
-		Features.push_back(ly);
+			idx = Features.size();
+			idxMap[name] = idx;
+			ly.active = true;
+			Features.push_back(ly);
+			return;
+		}
+		std::cerr << "Error in imNote::annotations::addLayer(" << name << "): "
+		          << "Layer already exisist." << std::endl;
 	}
 
 	unsigned int imNote::annotations::getLayerIdx(const std::string &name)

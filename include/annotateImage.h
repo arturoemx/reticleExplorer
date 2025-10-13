@@ -26,7 +26,7 @@ namespace imNote
 
 	struct imageFeature: public featureDescriptor
 	{
-		cv::Mat feature;
+		cv::Mat ftre;
 
 		imageFeature(uint val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 		
@@ -34,6 +34,8 @@ namespace imNote
 		
 		void apply(cv::Mat &I);
 	};
+
+	std::ostream &operator<< (std::ostream &s, imageFeature &iF);
 
 	struct pointFeature: public featureDescriptor
 	{
@@ -46,6 +48,8 @@ namespace imNote
 		void apply(cv::Mat &I);
 	};
 
+	std::ostream &operator<< (std::ostream &s, pointFeature &iF);
+
 	struct lineFeature: public featureDescriptor
 	{
 		dLine ftre;
@@ -57,6 +61,8 @@ namespace imNote
 		void apply(cv::Mat &I);
 	};
 
+	std::ostream &operator<< (std::ostream &s, lineFeature &lF);
+
 	struct circleFeature: public featureDescriptor
 	{
 		dCircle ftre;
@@ -67,6 +73,8 @@ namespace imNote
 
 		void apply(cv::Mat &I);
 	};
+
+	std::ostream &operator<< (std::ostream &s, circleFeature &cF);
 
 	struct markerFeature: public featureDescriptor
 	{
@@ -88,12 +96,13 @@ namespace imNote
 		void apply(cv::Mat &I);
 	};
 
+	std::ostream &operator<< (std::ostream &s, markerFeature &cF);
+
 	struct featureLayer
 	{
 		std::string name;
 		bool active;
 		std::vector<std::shared_ptr<featureDescriptor>> L;
-		cv::Mat lyImage;
 
 		featureLayer(const std::string &_name, int _r, int _c);
 		
@@ -109,6 +118,8 @@ namespace imNote
 		
 		void applyFeatures(cv::Mat &I);
 	};
+
+	std::ostream &operator<<(std::ostream &s, featureLayer &fL);
 
 	struct annotations
 	{

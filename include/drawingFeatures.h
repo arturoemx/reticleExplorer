@@ -10,56 +10,39 @@ struct drawingFeatures
 {
 	int thickness;
 	int lineType;
-	drawingFeatures()
-	{
-		thickness = 1;
-		lineType = cv::LINE_8;
-	}
-	void setThickness(int t)
-	{
-		thickness = t;
-	}
-	void setLineType(int type)
-	{
-		lineType = type;
-	}
+	drawingFeatures();
+	void setThickness(int t);
+	void setLineType(int type);
 };
 
 struct dPoint: public gfeat::point2D, public drawingFeatures
 {
-	dPoint():point2D()
-	{
-	}
-	template <typename X>
-	dPoint(X _x, X _y, X _w = 1):point2D(_x, _y, _w)
-	{
-
-	}
+	dPoint():point2D(){}
+	
+	dPoint(float _x, float _y, float _w = 1):point2D(_x, _y, _w){}
 };
+
+std::ostream &operator<< (std::ostream &s, dPoint &p);
+
 struct dLine: public gfeat::line2D, public drawingFeatures
 {
-	dLine():line2D()
-	{
-	}
-	template <typename X>
-	dLine(X _A, X _B, X _C):line2D(_A, _B, _C)
-	{
-	}
-	template <typename X>
-	dLine(X x1, X y1, X x2, X y2):line2D(x1, y1, x2, y2)
-	{
-	}
+	dLine():line2D(){}
+	
+	dLine(float _A, float _B, float _C):line2D(_A, _B, _C){}
+	
+	dLine(float x1, float y1, float x2, float y2):line2D(x1, y1, x2, y2){}
 };
+
+std::ostream &operator<< (std::ostream &s, dLine &l);
+
+
 struct dCircle: public gfeat::circle, public drawingFeatures 
 {
-	dCircle():circle()
-	{
-	}
-	template <typename X>
-	dCircle(X _h, X _k, X _r):circle(_h, _k, _r)
-	{
-
-	}
+	dCircle():circle(){}
+	
+	dCircle(float _h, float _k, float _r):circle(_h, _k, _r){}
 };
+
+std::ostream &operator<< (std::ostream &s, dCircle &c);
 
 #endif
