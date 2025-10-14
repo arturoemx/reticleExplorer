@@ -17,49 +17,6 @@ using namespace imNote;
 enum KeyCodes {Esc=27, KeyUp=65362, KeyLeft=65361, KeyDown=65364, KeyRight=65363, Key_p=112, Key_P=80};
 #endif
 
-struct reticleParams
-{
-	//Threshold Parameters
-	int brightThr;
-
-	//Canny_Parameters
-	int lowThr, highThr;
-	int CannyAppertureSize;
-	bool L2Gradient;
-
-	//Hough Parameters
-	double rho;
-	double theta;
-	int voteThr;
-	int minLineLength;
-
-	reticleParams(uint bThr, uint lThr, uint hThr, int CAP, bool L2G, double _rho, double _theta, int _vThr, int minLL)
-	{
-		brightThr = bThr;
-		lowThr = lThr;
-		highThr = hThr;
-		CannyAppertureSize = CAP;
-		L2Gradient = L2G;
-		rho  = _rho;
-		theta = _theta;
-		voteThr = _vThr;
-		minLineLength = minLL;
-	}
-	
-	reticleParams()
-	{
-		brightThr = 219;
-		lowThr = 127;
-		highThr = 128;
-		CannyAppertureSize = 3;
-		L2Gradient = true;
-		rho  = 0.25; // one fourth of a pixel.
-		theta = M_PI/360; //0.5 degrees
-		voteThr = 15;
-		minLineLength = 10;
-	}	
-};
-
 struct pathTStamp
 {
 	string path;
@@ -87,6 +44,118 @@ void loadParseFileNames(string dirName, vector<pathTStamp> &fNm)
     }
 }
 
+struct reticleParams
+{
+	//Threshold Parameters
+	int intensityThr;
+
+	//Canny_Parameters
+	int  CannyLowThr, CannyHighThr;
+	int  CannyAppertureSize;
+	bool CannyL2Gradient;
+
+	//Hough Parameters
+	double HoughRho;
+	double HoughTheta;
+	int    HoughVoteThr;
+	int    HoughMinLineLength;
+	bool *changeFlag;
+	string windowName;
+
+	reticleParams(const string &WN, uint iThr, uint lThr, uint hThr, int CAP, bool L2G, double _rho, double _theta, int _vThr, int minLL, bool *chF)
+	{
+		intensityThr = iThr;
+		CannyLowThr = lThr;
+		CannyHighThr = hThr;
+		CannyAppertureSize = CAP;
+		CannyL2Gradient = L2G;
+		HoughRho  = _rho;
+		HoughTheta = _theta;
+		HoughVoteThr = _vThr;
+		HoughMinLineLength = minLL;
+		windowName = WN;
+		changeFlag = chF;
+		*changeFlag = false;
+	}
+	
+	reticleParams(const string &WN, bool *chF)
+	{
+		intensityThr = 219;
+		CannyLowThr = 127;
+		CannyHighThr = 128;
+		CannyAppertureSize = 5;
+		CannyL2Gradient = true;
+		HoughRho  = 0.125; // one fourth of a pixel.
+		HoughTheta = M_PI/720; //0.5 degrees
+		HoughVoteThr = 15;
+		HoughMinLineLength = 10;
+		windowName = WN;
+		changeFlag = chF;
+		*changeFlag = false;
+	}
+};
+
+ostream &operator<<(ostream &s, reticleParams &p)
+{
+	s << "Intensity Threshold : " << p.intensityThr << endl
+	  << "Canny Low Threshold : " << p.CannyLowThr << endl
+	  << "Canny high Threshold: " << p.CannyHighThr << endl
+	  << "Canny Apperture Size: " << p.CannyAppertureSize << endl
+	  << "Canny L2 Gradient   : " << p.CannyL2Gradient << endl
+	  << "Hough Rho           : " << p.HoughRho << endl
+	  << "Hough Theta         : " << p.HoughTheta << endl
+	  << "Hough Vote Threshold: " << p.HoughVoteThr << endl
+	  << "Hough Min LineLength: " << p.HoughMinLineLength << endl << endl;
+
+	  return s;
+}
+
+
+//**********************************************************************
+//**                            Control Panel                         **
+//**********************************************************************
+
+
+
+void intensityChange(int pos, void *data)
+{
+	reticleParams *rP = (reticleParams *)data;
+	rP->intensityThr = pos;
+	*(rP->changeFlag) =  true;
+}
+
+void CannyLowThrChange(int pos, void *data)
+{
+	reticleParams *rP = (reticleParams *)data;
+	rP->CannyLowThr = pos;
+	*(rP->changeFlag) =  true;
+}
+
+void CannyHighThrChange(int pos, void *data)
+{
+	reticleParams *rP = (reticleParams *)data;
+	rP->CannyHighThr = pos;
+	*(rP->changeFlag) =  true;
+}
+
+void CannyAppertureSizeChange(int pos, void *data)
+{
+	reticleParams *rP = (reticleParams *)data;
+	rP->CannyAppertureSize = 3 + pos * 2;
+	*(rP->changeFlag) =  true;
+}
+
+void lauchControls(reticleParams &prms, const string &controlWindowName)
+{
+	intensityChange(219,&prms);
+	CannyLowThrChange(127,&prms);
+	CannyHighThrChange(128,&prms);
+	CannyAppertureSizeChange(1,&prms);
+	createTrackbar("Intensity Thr", controlWindowName, &prms.intensityThr, 255, intensityChange, &prms);
+	createTrackbar("Canny Low Thr", controlWindowName, &prms.CannyLowThr, 255, CannyLowThrChange, &prms);
+	createTrackbar("Canny Low High", controlWindowName, &prms.CannyHighThr, 255, CannyHighThrChange, &prms);
+	createTrackbar("Canny Apperture Size", controlWindowName, nullptr, 2, CannyAppertureSizeChange, &prms);
+}
 
 void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
 {
@@ -95,25 +164,30 @@ void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
 	vector<Vec4f>::iterator itL, endL;
 
 	//Umbraliza
-	if (prm.brightThr > 0)
-		threshold(Gray, Binary, prm.brightThr, 255, THRESH_BINARY);
+	if (prm.intensityThr > 0)
+		threshold(Gray, Binary, prm.intensityThr, 255, THRESH_BINARY);
 	else
-		if (prm.brightThr > 0)
-			threshold(Gray, Binary, prm.brightThr, 255, THRESH_OTSU);
+		if (prm.intensityThr == 0)
+			threshold(Gray, Binary, prm.intensityThr, 255, THRESH_OTSU);
 		else
-			adaptiveThreshold 	(Gray, Binary, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 11, 0);
+			adaptiveThreshold 	(Gray, Binary, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 45, 0);
 
-	Feat.addLayer("Binary");
-	Feat.addImageFeature("Binary", Binary, Scalar_<uchar> (0, 128, 0));
+	imwrite("Gray.png", Gray);
+
+	//Feat.addLayer("Binary");
+	//Feat.addImageFeature("Binary", Binary, Scalar_<uchar> (0, 128, 0));
+	imwrite("Binary.png", Binary);
 	
 	//Encuentra Bordes.
-	Canny (Binary, Edges, prm.lowThr, prm.highThr, prm.CannyAppertureSize, prm.L2Gradient);
+	Canny (Binary, Edges, prm.CannyLowThr, prm.CannyHighThr, prm.CannyAppertureSize, prm.CannyL2Gradient);
+	threshold(Edges, Edges, prm.intensityThr, 255, THRESH_OTSU);
 
 	Feat.addLayer("Edges");
-	Feat.addImageFeature("Edges", Binary, Scalar_<uchar> (255, 255, 0));
+	Feat.addImageFeature("Edges", Edges, Scalar_<uchar> (255, 255, 0));
+	imwrite("Edges.png", Edges);
 
 	
-	HoughLinesP (Edges, lines, prm.rho, prm.theta, prm.voteThr, prm.minLineLength);
+	HoughLinesP (Edges, lines, prm.HoughRho, prm.HoughTheta, prm.HoughVoteThr, prm.HoughMinLineLength);
 
 	Feat.addLayer("Lines");
 	itL = lines.begin();
@@ -121,7 +195,7 @@ void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
 	for (;itL != endL;++itL)
 	{
 		dLine dL((*itL)[0],(*itL)[1],(*itL)[2],(*itL)[3]);
-		dL.setThickness(3);
+		dL.setThickness(1);
 
 		Feat.addLineFeature("Lines", dL, Scalar_<uchar> (0, 196, 0));
 	}
@@ -135,11 +209,14 @@ int main(int argc, char **argv)
 	vector <mFrame> Images;
 	vector<annotations> Notes;
 	string dirName;
-	u_int idx, idxName, firstImage = 0, lastImage = 0, nImages = 0;
+	u_int idx, idxOld, idxName, firstImage = 0, lastImage = 0, nImages = 0;
 	bool running = true;
 	KeyCodes key;
-	reticleParams rPrms;
+	
 	Mat Gray, dGray;
+	bool changeFlag;
+	reticleParams rPrms("", &changeFlag);
+	
 
 	showDisplay D;
 	
@@ -188,60 +265,73 @@ int main(int argc, char **argv)
 
 
 	namedWindow("Display", WINDOW_GUI_EXPANDED);
+	namedWindow("Control", WINDOW_GUI_NORMAL);
 	
 	D.testDisplay();
-	idx = 0;
+	idxOld = idx = 0;
 	D.setMain(Images[idx].Frame);
     imshow("Display", D.Display);
+
+    changeFlag = true;
+    lauchControls(rPrms, "Control");
+	waitKeyEx(1);
+
     do
     {
-    	key = (KeyCodes)(waitKeyEx(0) & 0x0000FFFF);
+    	key = (KeyCodes)(waitKeyEx(30) & 0x0000FFFF);
     	
     	switch (key)
     	{
     		case KeyUp:
     			cout << "Retreat"<< endl; cout.flush();
+    			idxOld = idx;
     			idx = idx > 0 ? idx-1 : idx;
+    			if (idxOld != idx)
+    				changeFlag = true;
     			D.setMain(Images[idx].Frame);
     			imshow("Display", D.Display);
     			waitKeyEx(1);
     			break;
     		case KeyDown:
     			cout << "Advance"<< endl; cout.flush();
+    			idxOld = idx;
     			idx = idx < nImages-1 ? idx+1 : idx;
+    			if (idxOld != idx)
+    				changeFlag = true;
     			D.setMain(Images[idx].Frame);
     			imshow("Display", D.Display);
     			waitKeyEx(1);
     			break;
-    		case Key_p:
-    		case Key_P: 
-    			//Convierte a tonos de gris.
-				cvtColor(Images[idx].Frame, Gray, COLOR_BGR2GRAY);
-    			processImage(rPrms, Gray, Notes[idx]);
-    			cvtColor(Gray,dGray,COLOR_GRAY2RGB);
-    			//imwrite("Gray.png", Gray);
-    			Notes[idx].applyAnnotations(dGray);
-    			D.setMain(dGray);
-    			imshow("Display", D.Display);
-    			waitKeyEx(1);
-
-    			cout << "Gray.channels = " << Gray.channels() << endl;
-    			cout << "dGray.channels = " << dGray.channels() << endl;
-    			for (long unsigned int i = 0; i < Notes[idx].Features.size(); ++i)
-    				cout << "FeatureLayer[" << i << "] = " << Notes[idx].Features[i] << endl << endl
-    				     <<  "**************************************************"
-    			         << endl << endl;
-
-    			break;
     		case Esc:
-    			running = false;
+    			running = changeFlag = false;
     			break;
     		default:
-    			cout << "Key:" << key << endl;
-    			cout.flush();
     			break;
     	}
 
+    	//Convierte a tonos de gris.
+    	if (changeFlag)
+    	{
+    		cout << "rPrms:" << rPrms << endl;
+    		cout.flush();
+ 
+			cvtColor(Images[idx].Frame, Gray, COLOR_BGR2GRAY);
+			processImage(rPrms, Gray, Notes[idx]);
+			cvtColor(Gray,dGray,COLOR_GRAY2RGB);
+			imwrite("Gray.png", Gray);
+			Notes[idx].applyAnnotations(dGray);
+			D.setMain(dGray);
+			imshow("Display", D.Display);
+			waitKeyEx(1);
+
+			cout << "Gray.channels = " << Gray.channels() << endl;
+			cout << "dGray.channels = " << dGray.channels() << endl;
+			for (long unsigned int i = 0; i < Notes[idx].Features.size(); ++i)
+				cout << "FeatureLayer[" << i << "] = " << Notes[idx].Features[i] << endl << endl
+				     <<  "**************************************************"
+			         << endl << endl;
+			changeFlag = false;
+		}
     } while (running);
 	
 	return 0;

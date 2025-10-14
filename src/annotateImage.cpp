@@ -341,8 +341,10 @@
 			Features.push_back(ly);
 			return;
 		}
+#ifdef __VERBOSE__
 		std::cerr << "Error in imNote::annotations::addLayer(" << name << "): "
 		          << "Layer already exisist." << std::endl;
+#endif		       
 	}
 
 	unsigned int imNote::annotations::getLayerIdx(const std::string &name)
@@ -449,8 +451,6 @@
 		idxMap[name] = idx + 1;
 		idxMap[tmpName] = idx;
 	}
-
-
 
 	void imNote::annotations::activateLayer(const std::string &name)
 	{
