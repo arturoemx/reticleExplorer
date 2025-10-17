@@ -321,6 +321,13 @@
 		cols = c;
 		featureIdx = 0;
 	}
+
+	void imNote::annotations::clear()
+	{
+		featureIdx = 0;
+		idxMap.clear();
+		Features.clear();
+	}
 	
 	void imNote::annotations::addLayer(const std::string &name)
 	{

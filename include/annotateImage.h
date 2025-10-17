@@ -129,6 +129,8 @@ namespace imNote
 		std::vector<featureLayer> Features;
 
 		annotations(int r, int c);
+
+		void clear();
 				
 		void addLayer(const std::string &name);
 

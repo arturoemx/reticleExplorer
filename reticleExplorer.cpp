@@ -85,8 +85,8 @@ struct reticleParams
 		CannyHighThr = 128;
 		CannyAppertureSize = 5;
 		CannyL2Gradient = true;
-		HoughRho  = 0.125; // one fourth of a pixel.
-		HoughTheta = M_PI/720; //0.5 degrees
+		HoughRho  = 0.25; // one fourth of a pixel.
+		HoughTheta = M_PI/360; //0.5 degrees
 		HoughVoteThr = 15;
 		HoughMinLineLength = 10;
 		windowName = WN;
@@ -314,7 +314,8 @@ int main(int argc, char **argv)
     	{
     		cout << "rPrms:" << rPrms << endl;
     		cout.flush();
- 
+
+    		Notes[idx].clear();
 			cvtColor(Images[idx].Frame, Gray, COLOR_BGR2GRAY);
 			processImage(rPrms, Gray, Notes[idx]);
 			cvtColor(Gray,dGray,COLOR_GRAY2RGB);

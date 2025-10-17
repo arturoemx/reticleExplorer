@@ -28,6 +28,34 @@ gfeat::vec2D::vec2D (cv::Vec2f &v)
 	p[2] = 1.; 
 }
 
+gfeat::vec2D::vec2D (vec2D &v)
+{
+	*this = v;
+}
+
+gfeat::vec2D &gfeat::vec2D::operator= (const gfeat::vec2D &v)
+{
+	p[0] = v.p[0];
+	p[1] = v.p[1];
+	p[2] = v.p[2];
+
+	return *this;
+}
+
+gfeat::vec2D &gfeat::vec2D::operator /= (float val)
+{
+	p[0] /= val;
+	p[1] /= val;
+	p[2] /= val;
+
+	return *this;
+}
+
+float gfeat::vec2D::operator[](int idx)
+{
+	return p[idx];
+}
+
 void gfeat::vec2D::cross(vec2D &s, vec2D &t)
 {
 	p[0] = s.p[1] * t.p[2] - s.p[2] * t.p[1];

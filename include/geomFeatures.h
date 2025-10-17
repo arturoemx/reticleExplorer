@@ -18,6 +18,14 @@ namespace gfeat
 		vec2D (cv::Vec3f &v);
 
 		vec2D (cv::Vec2f &v);
+
+		vec2D (vec2D &v);
+
+		vec2D &operator= (const vec2D &v);
+
+		vec2D &operator /= (float v);
+
+		float operator[](int idx);
 		
 		void cross(vec2D &s, vec2D &t);
 		
