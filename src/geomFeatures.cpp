@@ -42,11 +42,34 @@ gfeat::vec2D &gfeat::vec2D::operator= (const gfeat::vec2D &v)
 	return *this;
 }
 
-gfeat::vec2D &gfeat::vec2D::operator /= (float val)
+gfeat::vec2D gfeat::vec2D::operator+ (const gfeat::vec2D &v)
 {
-	p[0] /= val;
-	p[1] /= val;
-	p[2] /= val;
+	gfeat::vec2D vo(p[0]+v.p[0], p[1]+v.p[1], p[2]+v.p[2]);
+
+	return vo;
+}
+
+gfeat::vec2D gfeat::vec2D::operator- (const gfeat::vec2D &v)
+{
+	gfeat::vec2D r(p[0]-v.p[0], p[1]-v.p[1], p[2]-v.p[2]);
+
+	return r;
+}
+
+gfeat::vec2D &gfeat::vec2D::operator += (const gfeat::vec2D &v)
+{
+	p[0] += v.p[0];
+	p[1] += v.p[1];
+	p[2] += v.p[2];
+
+	return *this;
+}
+
+gfeat::vec2D &gfeat::vec2D::operator -= (const gfeat::vec2D &v)
+{
+	p[0] -= v.p[0];
+	p[1] -= v.p[1];
+	p[2] -= v.p[2];
 
 	return *this;
 }
@@ -56,11 +79,26 @@ float gfeat::vec2D::operator[](int idx)
 	return p[idx];
 }
 
-void gfeat::vec2D::cross(vec2D &s, vec2D &t)
+gfeat::vec2D gfeat::vec2D::cross(vec2D &s, vec2D &t)
 {
-	p[0] = s.p[1] * t.p[2] - s.p[2] * t.p[1];
-	p[1] = s.p[2] * t.p[0] - s.p[0] * t.p[2],
-	p[2] = s.p[0] * t.p[1] - s.p[1] * t.p[0];
+	gfeat::vec2D c;
+
+	c.p[0] = s.p[1] * t.p[2] - s.p[2] * t.p[1];
+	c.p[1] = s.p[2] * t.p[0] - s.p[0] * t.p[2],
+	c.p[2] = s.p[0] * t.p[1] - s.p[1] * t.p[0];
+
+	return c;
+}
+
+void gfeat::vec2D::cross(vec2D &t)
+{
+	gfeat::vec2D s;
+
+	s.p[0] = p[1] * t.p[2] - p[2] * t.p[1];
+	s.p[1] = p[2] * t.p[0] - p[0] * t.p[2],
+	s.p[2] = p[0] * t.p[1] - p[1] * t.p[0];
+
+	*this = s;
 }
 
 void gfeat::vec2D::norm()
@@ -75,7 +113,7 @@ void gfeat::vec2D::norm()
 	p[2] *= mag;
 }
 
-std::ostream &gfeat::operator<< (std::ostream &s, gfeat::vec2D &v)
+std::ostream &gfeat::operator<< (std::ostream &s, gfeat::vec2D v)
 {
 	s << "[" << v.p[0] << ", " << v.p[1] << ", " << v.p[2] << "]";
 	return s;
@@ -145,11 +183,11 @@ gfeat::point2D::point2D(cv::Vec2f &v):gfeat::vec2D(v)
 	cy = p[1] * iw;
 }
 
-void gfeat::point2D::intersect(gfeat::vec2D &l1, gfeat::vec2D &l2)
+void gfeat::point2D::intersect(gfeat::line2D &l1, gfeat::line2D &l2)
 {
 	float iw;
 
-	l1.cross(l1, l2);
+	*this = cross(l1, l2);
 	iw = 1./p[2];
 	cx = p[0] * iw;
 	cy = p[1] * iw;
@@ -226,9 +264,9 @@ gfeat::line2D::line2D(cv::Vec4f &v)
 	}
 }
 
-void gfeat::line2D::join(vec2D &p1, vec2D &p2)
+void gfeat::line2D::join(gfeat::point2D &p1, gfeat::point2D &p2)
 {
-	cross(p1, p2);
+	*this = cross(p1, p2);
 	x1 = y1 = x2 = y2 = 0.;
 	unbound = true;
 }

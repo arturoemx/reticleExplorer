@@ -19,17 +19,17 @@
 */
 struct clipBox
 {
-   gfeat::vec2D corners[4];
-   gfeat::vec2D sides[4];
+   gfeat::point2D corners[4];
+   gfeat::line2D sides[4];
 
    clipBox(float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3);
    
    clipBox(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3);
    
-   bool clipLines(gfeat::line2D &l, gfeat::point2D &p1, gfeat::point2D &p2);
+   bool clipLine(gfeat::line2D &l, gfeat::point2D &p1, gfeat::point2D &p2);
    
 };
    
-bool line_similarity(gfeat::line2D &line_a, gfeat::line2D &line_b, clipBox &clpB, float threshold, float d);
+bool lineSimilarity(gfeat::line2D &line_a, gfeat::line2D &line_b, clipBox &clpB, float &d, float threshold);
 
 #endif

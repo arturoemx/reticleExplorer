@@ -2,6 +2,7 @@
 #include <showDisplay.h>
 #include <mFrame.h>
 #include <annotateImage.h>
+#include <lineSimilarity.h>
 #include <vector>
 #include <string>
 #include <boost/filesystem.hpp>
@@ -157,11 +158,70 @@ void lauchControls(reticleParams &prms, const string &controlWindowName)
 	createTrackbar("Canny Apperture Size", controlWindowName, nullptr, 2, CannyAppertureSizeChange, &prms);
 }
 
+struct dists
+{
+	int idx1, idx2;
+	float d;
+	bool close;
+	dists()
+	{
+		idx1 = idx2 = 0;
+		d = 0.;
+		close = false;
+	}
+	dists(int _idx1, int _idx2, float _d, bool _close)
+	{
+		idx1 = _idx1;
+		idx2 = _idx2;
+		d = _d;
+		close = _close;
+	}
+};
+
+ostream &operator<< (ostream &s, dists &d)
+{
+	s << d.idx1 << ", " << d.idx2 << ", " << d.d << ", " << d.close << endl;
+	return s;
+}
+
+int checkLines(vector<Vec4f> &l, clipBox &clpB, float threshold, vector<dists> &D)
+{
+	int tope1, tope2, i, j, k, cont;
+	float d = 0;
+	bool close;
+	vector<Vec4f>::iterator itL1, itL2;
+	dLine dL1, dL2;
+
+	tope2 = l.size();
+	if (tope2  == 0)
+		return 0;
+	tope1 = tope2 - 1;
+	
+	itL1 = l.begin();
+	cont = 0;
+	for (i=k=0;i<tope1;++i, ++itL1)
+	{
+		dL1 = dLine((*itL1)[0],(*itL1)[1],(*itL1)[2],(*itL1)[3]);
+		itL2 = itL1+1;
+		for (j=i+1;j<tope2;++j, ++k, ++itL2)
+		{
+			dL2 = dLine((*itL2)[0],(*itL2)[1],(*itL2)[2],(*itL2)[3]);
+
+			close = lineSimilarity(dL1, dL2, clpB, d, threshold=2);
+			if (close)
+				cont++;
+			D.push_back(dists(i, j, d, close));
+		}
+	}
+	return cont;
+}
+
 void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
 {
 	Mat Binary, Edges;
 	vector<Vec4f> lines;
 	vector<Vec4f>::iterator itL, endL;
+	vector<dists> D;
 
 	//Umbraliza
 	if (prm.intensityThr > 0)
@@ -189,7 +249,31 @@ void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
 	
 	HoughLinesP (Edges, lines, prm.HoughRho, prm.HoughTheta, prm.HoughVoteThr, prm.HoughMinLineLength);
 
+	{
+		int nClose;
+		clipBox clpB(0, 0, Gray.cols-1, 0, Gray.cols-1, Gray.rows-1, 0, Gray.rows-1);
+
+		nClose = checkLines(lines, clpB, 1, D);
+		cout << "Se analizaron " << D.size() << " pares de lineas." << endl
+		     << "De ellas, " << nClose << " lineas que estaban cerca de otras:" << endl;
+		
+		for (size_t i=0; i<D.size();++i)
+			if (D[i].close)
+				cout << D[i] << endl;
+		cout << endl;
+
+		cout << endl << "y " << D.size() - nClose << " lineas lo estaban:" << endl;
+		
+		for (size_t i=0; i<D.size();++i)
+			if (!D[i].close)
+				cout << D[i] << endl;
+		cout << endl << endl;
+
+		
+	}
+
 	Feat.addLayer("Lines");
+
 	itL = lines.begin();
 	endL = lines.end();
 	for (;itL != endL;++itL)
@@ -199,6 +283,7 @@ void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
 
 		Feat.addLineFeature("Lines", dL, Scalar_<uchar> (0, 196, 0));
 	}
+
 }
 
 
