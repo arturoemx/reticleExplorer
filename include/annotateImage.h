@@ -54,11 +54,12 @@ namespace imNote
 	{
 		dLine ftre;
 
+
 		lineFeature(uint val, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 		
 		void set(dLine &val);
 
-		void apply(cv::Mat &I);
+		void apply(cv::Mat &I, bool segment);
 	};
 
 	std::ostream &operator<< (std::ostream &s, lineFeature &lF);
@@ -116,7 +117,7 @@ namespace imNote
 		
 		void addMarkerFeature(dPoint &val, u_int id, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255), cv::MarkerTypes mt = cv::MARKER_CROSS);
 		
-		void applyFeatures(cv::Mat &I);
+		void applyFeatures(cv::Mat &I, bool unboundLines);
 	};
 
 	std::ostream &operator<<(std::ostream &s, featureLayer &fL);
@@ -148,7 +149,7 @@ namespace imNote
 
 		void toggleLayer(const std::string &name);
 		
-		void applyAnnotations(cv::Mat &I);
+		void applyAnnotations(cv::Mat &I, bool unboundLines=false);
 		
 		void addImageFeature(const std::string &name, cv::Mat &I, cv::Scalar_<uchar> C = cv::Scalar_<uchar>(255,255,255));
 		

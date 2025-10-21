@@ -1,4 +1,5 @@
 #include <annotateImage.h>
+#include <clipBox.h>
 #include <ostream>
 
 	imNote::featureDescriptor::featureDescriptor(uint val, cv::Scalar_<uchar> C)
@@ -82,13 +83,39 @@
 		ftre = val;
 	}
 
-	void imNote::lineFeature::apply(cv::Mat &I)
+	void imNote::lineFeature::apply(cv::Mat &I, bool unboundLines=false)
 	{
-		if (!ftre.unbound)	
+		cv::Scalar_<uchar> C;
+
+		C[0]=255;
+		C[1]=196;
+		C[2]=0;
+
+		if (!ftre.unbound)
+		{
+			if (unboundLines)
+			{
+				gfeat::point2D p1, p2;
+
+				clipBox clB(0, 0, I.cols, 0, I.cols, I.rows , 0, I.rows);
+				if (clB.clipLine(ftre, p1, p2))
+					cv::line(I, cv::Point(p1.p[0],p1.p[1]),	cv::Point(p2.p[0],p2.p[1]),
+					C, ftre.thickness, ftre.lineType);
+			}
 			cv::line(I, cv::Point((int)rintf(ftre.x1),(int)rintf(ftre.y1)),
 			            cv::Point((int)rintf(ftre.x2),(int)rintf(ftre.y2)),
-			            Color, ftre.thickness, ftre.lineType);
-		//else to Be Done Case of unbounded line.
+			            Color, ftre.thickness * 2, ftre.lineType);
+		}
+		else
+		{
+			clipBox clB(0, 0, I.cols, 0, I.cols, I.rows , 0, I.rows);
+			gfeat::point2D p1, p2;
+
+			if (clB.clipLine(ftre, p1, p2))
+				cv::line(I, cv::Point(p1.p[0],p1.p[1]),	cv::Point(p2.p[0],p2.p[1]),
+			    C, ftre.thickness, ftre.lineType);	
+
+		}
 	}
 
 	std::ostream &imNote::operator<< (std::ostream &s, imNote::lineFeature &lF)
@@ -223,7 +250,7 @@
 		L.push_back(ptr);
 	}
 
-	void imNote::featureLayer::applyFeatures(cv::Mat &I)
+	void imNote::featureLayer::applyFeatures(cv::Mat &I, bool unboundLines=false)
 	{
 		featureDescriptor *ptr;
 		std::vector<std::shared_ptr<featureDescriptor>>::iterator it, end;
@@ -243,7 +270,7 @@
 						((pointFeature *)ptr)->apply(I);
 					break;
 				case line:
-						((lineFeature *)ptr)->apply(I);
+						((lineFeature *)ptr)->apply(I, unboundLines);
 					break;
 				case circle:
 						((circleFeature *)ptr)->apply(I);
@@ -516,7 +543,7 @@
 			Features[idx].active = true;
 	}
 
-	void imNote::annotations::applyAnnotations(cv::Mat &I)
+	void imNote::annotations::applyAnnotations(cv::Mat &I, bool unboundLines)
 	{
 		unsigned int i, N;
 
@@ -532,7 +559,7 @@
 		N = Features.size();
 		for (i = 0;i < N; ++i)
 			if (Features[i].active == true)
-				Features[i].applyFeatures(I);
+				Features[i].applyFeatures(I, unboundLines);
 	}
 
 	void imNote::annotations::addImageFeature(const std::string &name, cv::Mat &I, cv::Scalar_<uchar> C)

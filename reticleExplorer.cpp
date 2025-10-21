@@ -405,7 +405,7 @@ int main(int argc, char **argv)
 			processImage(rPrms, Gray, Notes[idx]);
 			cvtColor(Gray,dGray,COLOR_GRAY2RGB);
 			imwrite("Gray.png", Gray);
-			Notes[idx].applyAnnotations(dGray);
+			Notes[idx].applyAnnotations(dGray, true);
 			D.setMain(dGray);
 			imshow("Display", D.Display);
 			waitKeyEx(1);
