@@ -7,7 +7,7 @@ CXXFLAGS = -Wall -g -I $(INCLUDEDIR) -DQT
 INCLUDES = $(INCLUDEDIR)/showDisplay.h $(INCLUDEDIR)/geomFeatures.h $(INCLUDEDIR)/drawingFeatures.h $(INCLUDEDIR)/annotateImage.h  
 
 
-all: testShowDisplay reticleExplorer testLineClipper testOperators
+all: testShowDisplay reticleExplorer testLineClipper testOperators testThreads
 
 testShowDisplay: objs/testShowDisplay.o lib/libAnnotate.a
 	g++ $(CXXFLAGS) -o testShowDisplay objs/testShowDisplay.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs`
@@ -17,6 +17,9 @@ testLineClipper: objs/testLineClipper.o lib/libAnnotate.a
 
 testOperators: objs/testOperators.o lib/libAnnotate.a
 	g++ $(CXXFLAGS) -o testOperators objs/testOperators.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs`
+
+testThreads: objs/testThreads.o lib/libAnnotate.a
+	g++ $(CXXFLAGS) -o testThreads objs/testThreads.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs`
 
 reticleExplorer: objs/reticleExplorer.o lib/libAnnotate.a
 	g++ $(CXXFLAGS) -o reticleExplorer objs/reticleExplorer.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs` -lboost_filesystem
@@ -30,8 +33,11 @@ objs/testLineClipper.o: testLineClipper.cpp $(INCLUDES)
 objs/testOperators.o: testOperators.cpp $(INCLUDES)
 	g++ $(CXXFLAGS) -o objs/testOperators.o -c testOperators.cpp `pkg-config opencv4 --cflags`
 
+objs/testThreads.o: testThreads.cpp $(INCLUDES)
+	g++ $(CXXFLAGS) -o objs/testThreads.o -c testThreads.cpp `pkg-config opencv4 --cflags`
+
 objs/reticleExplorer.o:reticleExplorer.cpp  $(INCLUDES)
 	g++ $(CXXFLAGS) -o objs/reticleExplorer.o -c reticleExplorer.cpp `pkg-config opencv4 --cflags`
 
 clean: 
-	rm objs/* testShowDisplay reticleExplorer testLineClipper testOperators
+	rm objs/* testShowDisplay reticleExplorer testLineClipper testOperators testThreads
