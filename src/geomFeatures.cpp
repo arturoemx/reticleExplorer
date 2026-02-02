@@ -1,6 +1,10 @@
 #include <geomFeatures.h>
 #include <math.h>
 
+//*************************************
+//*************** VEC2D ***************
+//*************************************
+
 gfeat::vec2D::vec2D ()
 {
 	p[0] = p[1] = 0.;
@@ -119,6 +123,9 @@ std::ostream &gfeat::operator<< (std::ostream &s, gfeat::vec2D v)
 	return s;
 }
 
+//*************************************
+//************** POINT2D **************
+//*************************************
 
 gfeat::point2D::point2D():vec2D()
 {
@@ -137,7 +144,7 @@ gfeat::point2D::point2D(float _x, float _y, float _w):gfeat::vec2D(_x, _y, _w)
 	}
 	else
 	{
-		iw = 1e6;// if the point is at the infinity.
+		iw = 1. / std::numeric_limits<double>::infinity();// if the point is at the infinity.
 		infinity = true; 
 	}
 
@@ -156,7 +163,7 @@ gfeat::point2D::point2D(cv::Vec3f &v):gfeat::vec2D(v)
 	}
 	else
 	{
-		iw = 1e6;// if the point is at the infinity.
+		iw = 1. / std::numeric_limits<double>::infinity();// if the point is at the infinity.
 		infinity = true; 
 	}
 
@@ -166,44 +173,47 @@ gfeat::point2D::point2D(cv::Vec3f &v):gfeat::vec2D(v)
 
 gfeat::point2D::point2D(cv::Vec2f &v):gfeat::vec2D(v)
 {
-	float iw;
+	infinity = false;
 
+	cx = p[0];
+	cy = p[1];
+}
+
+void gfeat::point2D::intersect(gfeat::vec2D &l1, gfeat::vec2D &l2)
+{
+	float iw;
+	gfeat::vec2D *q = this;
+
+	*q = cross(l1, l2);
 	if (p[2] != 0)
 	{
 		iw = 1./p[2];
-		infinity = true;
+		infinity = false;
 	}
 	else
 	{
-		iw = 1e6;// if the point is at the infinity.
+		iw = 1./std::numeric_limits<double>::infinity();// if the point is at the infinity.
 		infinity = true; 
 	}
-
 	cx = p[0] * iw;
 	cy = p[1] * iw;
 }
 
-void gfeat::point2D::intersect(gfeat::line2D &l1, gfeat::line2D &l2)
-{
-	float iw;
-
-	*this = cross(l1, l2);
-	iw = 1./p[2];
-	cx = p[0] * iw;
-	cy = p[1] * iw;
-}
-
-std::ostream &gfeat::operator<< (std::ostream &s, gfeat::point2D &p)
+std::ostream &gfeat::operator<< (std::ostream &s, gfeat::point2D p)
 {
 	s << "(" << p.cx << ", " << p.cy;
 
 	if (p.infinity == true)
-		s << ",∞)";
+		s << ",Infinity)";
 	else
 		s << ")";
 
 	return s;
 }
+
+//*************************************
+//*************** LINE2D **************
+//*************************************
 
 gfeat::line2D::line2D():vec2D()
 {
@@ -212,13 +222,6 @@ gfeat::line2D::line2D():vec2D()
 }
 
 gfeat::line2D::line2D(float _A, float _B, float _C ):gfeat::vec2D(_A, _B, _C)
-{
-	x1 = y1 = x2 = y2 = 0.;
-	unbound = true;
-}
-
-
-gfeat::line2D::line2D(cv::Vec3f &v):gfeat::vec2D(v)
 {
 	x1 = y1 = x2 = y2 = 0.;
 	unbound = true;
@@ -244,6 +247,18 @@ gfeat::line2D::line2D(float _x1, float _y1, float _x2, float _y2)
 	}
 }
 
+gfeat::line2D::line2D(cv::Vec2f &v):gfeat::vec2D(v)
+{
+	x1 = y1 = x2 = y2 = 0.;
+	unbound = true;
+}
+
+gfeat::line2D::line2D(cv::Vec3f &v):gfeat::vec2D(v)
+{
+	x1 = y1 = x2 = y2 = 0.;
+	unbound = true;
+}
+
 gfeat::line2D::line2D(cv::Vec4f &v)
 {
 	x1 = v[0];
@@ -264,25 +279,35 @@ gfeat::line2D::line2D(cv::Vec4f &v)
 	}
 }
 
-void gfeat::line2D::join(gfeat::point2D &p1, gfeat::point2D &p2)
+void gfeat::line2D::join(gfeat::vec2D &p1, gfeat::vec2D &p2)
 {
-	*this = cross(p1, p2);
-	x1 = y1 = x2 = y2 = 0.;
-	unbound = true;
+	gfeat::vec2D *q = this;
+
+	*q = cross(p1, p2);
+
+	x1 = p1.p[0]/p1.p[2];
+	y1 = p1.p[1]/p1.p[2];
+	x2 = p2.p[0]/p2.p[2];
+	y2 = p2.p[1]/p2.p[2];
+	unbound = false;
 }
 
-std::ostream &gfeat::operator<< (std::ostream &s, gfeat::line2D &l)
+std::ostream &gfeat::operator<< (std::ostream &s, gfeat::line2D l)
 {
 	gfeat::vec2D *pl = (gfeat::vec2D *)&l;
 
 	if (l.unbound == false)
 		s << "Pt{(" << l.x1 << "," << l.y1 << ")-(" << l.x2 << "," << l.y2
-		  << "|" << sqrt(pow(l.x1-l.x2,2)+pow(l.y1-l.y2,2)) << "):"
+		  << ")|" << sqrt(pow(l.x1-l.x2,2)+pow(l.y1-l.y2,2)) << ":"
       	  << *pl << "}";
 	else
 		s << "Pt{" << *pl <<"}";
 	return s;
 }
+
+//*************************************
+//*************** CIRCLE **************
+//*************************************
 
 gfeat::circle::circle()
 {
@@ -303,8 +328,8 @@ gfeat::circle::circle (cv::Vec3f &c)
 	r = c[2];
 }
 
-std::ostream &gfeat::operator<< (std::ostream &s, gfeat::circle &l)
+std::ostream &gfeat::operator<< (std::ostream &s, gfeat::circle c)
 {
-	s << "Circ{(" << l.h << ",  " << l.k << "):" << l.r << "}";
+	s << "Circ{(" << c.h << ",  " << c.k << "):" << c.r << "}";
 	return s;
 }

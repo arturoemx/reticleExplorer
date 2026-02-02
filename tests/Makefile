@@ -1,7 +1,8 @@
 
 
-INCLUDEDIR = ./include
-LIBDIR = ./lib
+TOPDIR = ../
+INCLUDEDIR = $(TOPDIR)include
+LIBDIR = $(TOPDIR)lib/
 CXXFLAGS = -Wall -g -I $(INCLUDEDIR) -DQT
 
 AVOID = 
@@ -10,22 +11,22 @@ INCLUDES = $(filter-out $(AVOID) ,$(wildcard $(INCLUDEDIR)/*.h))
 
 all: testShowDisplay reticleExplorer testLineClipper testOperators testThreads testDynamicDisplay
 
-testShowDisplay: objs/testShowDisplay.o lib/libAnnotate.a
+testShowDisplay: objs/testShowDisplay.o $(LIBDIR)libAnnotate.a
 	g++ $(CXXFLAGS) -o testShowDisplay objs/testShowDisplay.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs`
 
-testLineClipper: objs/testLineClipper.o lib/libAnnotate.a
+testLineClipper: objs/testLineClipper.o $(LIBDIR)libAnnotate.a
 	g++ $(CXXFLAGS) -o testLineClipper objs/testLineClipper.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs`
 
-testOperators: objs/testOperators.o lib/libAnnotate.a
+testOperators: objs/testOperators.o $(LIBDIR)libAnnotate.a
 	g++ $(CXXFLAGS) -o testOperators objs/testOperators.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs`
 
-testThreads: objs/testThreads.o lib/libAnnotate.a
+testThreads: objs/testThreads.o $(LIBDIR)libAnnotate.a
 	g++ $(CXXFLAGS) -o testThreads objs/testThreads.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs`
 
-reticleExplorer: objs/reticleExplorer.o lib/libAnnotate.a
+reticleExplorer: objs/reticleExplorer.o $(LIBDIR)libAnnotate.a
 	g++ $(CXXFLAGS) -o reticleExplorer objs/reticleExplorer.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs` -lboost_filesystem
 
-testDynamicDisplay: objs/testDynamicDisplay.o lib/libAnnotate.a
+testDynamicDisplay: objs/testDynamicDisplay.o $(LIBDIR)libAnnotate.a
 	g++ $(CXXFLAGS) -o testDynamicDisplay objs/testDynamicDisplay.o -L$(LIBDIR) -lAnnotate `pkg-config opencv4 --libs` -lboost_filesystem
 
 objs/testShowDisplay.o: testShowDisplay.cpp $(INCLUDES)

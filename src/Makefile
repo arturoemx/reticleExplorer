@@ -10,7 +10,7 @@ OBJDIR = ./objs/
 CXXFLAGS += -g -Wall -D__VERBOSE__
 LIB = libAnnotate.a
 
-AVOID = geomFeatures.cpp
+AVOID = 
 
 
 SRCS = $(filter-out $(AVOID) ,$(wildcard *.cpp))

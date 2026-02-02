@@ -83,7 +83,7 @@
 		ftre = val;
 	}
 
-	void imNote::lineFeature::apply(cv::Mat &I, bool unboundLines=false)
+	void imNote::lineFeature::apply(cv::Mat &I, bool unboundLines)
 	{
 		cv::Scalar_<uchar> C;
 
@@ -208,7 +208,7 @@
 		return s;
 	}
 
-	imNote::featureLayer::featureLayer(const std::string &_name, int _r, int _c)
+	imNote::featureLayer::featureLayer(const std::string &_name)
 	{	
 		name = _name;
 		active = false;
@@ -367,7 +367,7 @@
 		}
 		catch(std::out_of_range& e)
 		{
-			featureLayer ly(name, rows, cols);
+			featureLayer ly(name);
 
 			idx = Features.size();
 			idxMap[name] = idx;
