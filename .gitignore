@@ -30,11 +30,3 @@
 *.exe
 *.out
 *.app
-
-reticleExplorer
-testShowDisplay
-testLineClipper
-testOperators
-testThreads
-testDynamicDisplay
-err

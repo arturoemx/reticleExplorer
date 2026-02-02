@@ -1,5 +1,7 @@
-# annotatedVisionExplorer
+/*!
+\mainpage annotatedVisor
 
 When developing Computer Vision and Image Processing algorithms and methods it is always useful to have means of tracking how the different quantities computed from images vary as the program runs. Usually ad-hoc methods are used for this purpose, and considerable time is spent implementing them. This computer package contains a set of tools for the representation and visualization of image geometric features, and to facilitate the interaction with computer vision processes.
 
 This package has been used by the authors and their students at the Faculty of Mathematics of the Authonomous University of Yucatan, for research purposes.
+*/
