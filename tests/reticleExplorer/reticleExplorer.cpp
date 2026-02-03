@@ -3,6 +3,7 @@
 #include <mFrame.h>
 #include <annotateImage.h>
 #include <lineSimilarity.h>
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <boost/filesystem.hpp>
@@ -249,29 +250,6 @@ void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
 	
 	HoughLinesP (Edges, lines, prm.HoughRho, prm.HoughTheta, prm.HoughVoteThr, prm.HoughMinLineLength);
 
-	{
-		int nClose;
-		clipBox clpB(0, 0, Gray.cols-1, 0, Gray.cols-1, Gray.rows-1, 0, Gray.rows-1);
-
-		nClose = checkLines(lines, clpB, 1, D);
-		cout << "Se analizaron " << D.size() << " pares de lineas." << endl
-		     << "De ellas, " << nClose << " lineas que estaban cerca de otras:" << endl;
-		
-		for (size_t i=0; i<D.size();++i)
-			if (D[i].close)
-				cout << D[i] << endl;
-		cout << endl;
-
-		cout << endl << "y " << D.size() - nClose << " lineas lo estaban:" << endl;
-		
-		for (size_t i=0; i<D.size();++i)
-			if (!D[i].close)
-				cout << D[i] << endl;
-		cout << endl << endl;
-
-		
-	}
-
 	Feat.addLayer("Lines");
 
 	itL = lines.begin();
@@ -286,6 +264,10 @@ void processImage(reticleParams &prm, cv::Mat Gray, annotations &Feat)
 
 }
 
+bool compFrames(mFrame &a, mFrame &b)
+{
+	return a.timeStamp < b.timeStamp;
+}
 
 int main(int argc, char **argv)
 {
@@ -348,6 +330,7 @@ int main(int argc, char **argv)
     cout << endl;
 #endif
 
+    sort(Images.begin(), Images.end(), compFrames);
 
 	namedWindow("Display", WINDOW_GUI_EXPANDED);
 	namedWindow("Control", WINDOW_GUI_NORMAL);
@@ -368,7 +351,7 @@ int main(int argc, char **argv)
     	switch (key)
     	{
     		case KeyUp:
-    			cout << "Retreat"<< endl; cout.flush();
+    			cout << "Retreat: "<< idx << endl; cout.flush();
     			idxOld = idx;
     			idx = idx > 0 ? idx-1 : idx;
     			if (idxOld != idx)
@@ -378,7 +361,7 @@ int main(int argc, char **argv)
     			waitKeyEx(1);
     			break;
     		case KeyDown:
-    			cout << "Advance"<< endl; cout.flush();
+    			cout << "Advance: "<< idx << endl; cout.flush();
     			idxOld = idx;
     			idx = idx < nImages-1 ? idx+1 : idx;
     			if (idxOld != idx)
@@ -410,12 +393,6 @@ int main(int argc, char **argv)
 			imshow("Display", D.Display);
 			waitKeyEx(1);
 
-			cout << "Gray.channels = " << Gray.channels() << endl;
-			cout << "dGray.channels = " << dGray.channels() << endl;
-			for (long unsigned int i = 0; i < Notes[idx].Features.size(); ++i)
-				cout << "FeatureLayer[" << i << "] = " << Notes[idx].Features[i] << endl << endl
-				     <<  "**************************************************"
-			         << endl << endl;
 			changeFlag = false;
 		}
     } while (running);

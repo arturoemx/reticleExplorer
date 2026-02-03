@@ -17,5 +17,5 @@ reticleExplorer: objs/reticleExplorer.o $(LIBDIR)libAnnotate.a
 objs/reticleExplorer.o:reticleExplorer.cpp  $(INCLUDES)
 	g++ $(CXXFLAGS) -o objs/reticleExplorer.o -c reticleExplorer.cpp `pkg-config opencv4 --cflags`
 
-clean: 
+clean:
 	rm objs/* reticleExplorer
